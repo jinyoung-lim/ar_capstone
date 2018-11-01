@@ -124,6 +124,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             else { return }
         
         // Rotate the node according to camera (only horizontally)
+        // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
         let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
         let newRotation = SCNVector3Make(0, yaw ?? 0, 0) // if no yaw -> 0
         shipNode.eulerAngles = newRotation
