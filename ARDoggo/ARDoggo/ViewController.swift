@@ -21,16 +21,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.delegate = self
         
         // Set the debuging options
-        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
+        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints, ARSCNDebugOptions.showWorldOrigin]
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
-        
-        // Create a new scene
-        //        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        
-        // Set the scene to the view
-        //        sceneView.scene = scene
         
         // Enable lighting
         sceneView.autoenablesDefaultLighting = true
@@ -48,6 +42,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Horizontal plane detection
         configuration.planeDetection = .horizontal
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -62,7 +57,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     // MARK: - ARSCNViewDelegate
     
-    //Override to create and configure nodes for anchors added to the view's session.
+    // Override to create and configure nodes for anchors added to the view's session.
     // Visualize horizontal planes refer: https://www.appcoda.com/arkit-horizontal-plane/
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         // Unwrap the anchor as an ARPlaneAnchor
@@ -92,12 +87,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     // Renderer to expand the horizontal planes
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
-        // First, unwrap the plane anchor as ARPlaneAnchor, then
-        // unwrap the first plane node, then
-        // unwrap the node geometry
+        // 1) Unwrap the plane anchor as ARPlaneAnchor
         guard let planeAnchor = anchor as? ARPlaneAnchor,
-            let planeNode = node.childNodes.first,
-            let plane = planeNode.geometry as? SCNPlane
+            let planeNode = node.childNodes.first, // 2) Unwrap the first plane node
+            let plane = planeNode.geometry as? SCNPlane // 3) Unwrap the node geometry
             else { return }
         
         // Update plane geometry
@@ -116,43 +109,39 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     
     @objc func addShipToSceneView(withGestureRecognizer recognizer: UIGestureRecognizer) {
+        // Use the tap location to determine if on a plane
         let tapLocation = recognizer.location(in: sceneView)
         let hitTestResults = sceneView.hitTest(tapLocation, types: .existingPlaneUsingExtent)
-        
         guard let hitTestResult = hitTestResults.first else { return }
-        //        let translation = hitTestResult.worldTransform.translation
         let translation = hitTestResult.worldTransform.columns.3
         let x = translation.x
         let y = translation.y
         let z = translation.z
         
+        // Add ship to the scene
         guard let shipScene = SCNScene(named: "art.scnassets/ship.scn"),
             let shipNode = shipScene.rootNode.childNode(withName: "ship", recursively: false)
             else { return }
         
+        // Rotate the node according to camera (only horizontally)
+        let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
+        let newRotation = SCNVector3Make(0, yaw ?? 0, 0) // if no yaw -> 0
+        shipNode.eulerAngles = newRotation
+        
         shipNode.position = SCNVector3(x,y,z)
         sceneView.scene.rootNode.addChildNode(shipNode)
-        
-        //        guard let dogScene = SCNScene(named: "art.scnassets/dog.fbx"),
-        //            let dogNode = dogScene.rootNode.childNode(withName: "dog", recursively: false)
-        //            else {return}
-        //        dogNode.position = SCNVector3(x, y, z)
-        //        sceneView.scene.rootNode.addChildNode(dogNode)
     }
     
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
-        
     }
     
     func sessionWasInterrupted(_ session: ARSession) {
         // Inform the user that the session has been interrupted, for example, by presenting an overlay
-        
     }
     
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
-        
     }
     
     // Detect tap gesture
