@@ -26,6 +26,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
+//        let scene = SCNScene(named: "art.scnassets/wolf_model_collada/Wolf_One_dae.dae")!
+//        sceneView.scene = scene
+        
+        
         // Enable lighting
         sceneView.autoenablesDefaultLighting = true
         sceneView.automaticallyUpdatesLighting = true
@@ -117,20 +121,23 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let x = translation.x
         let y = translation.y
         let z = translation.z
-        
-        // Add ship to the scene
-        guard let shipScene = SCNScene(named: "art.scnassets/ship.scn"),
-            let shipNode = shipScene.rootNode.childNode(withName: "ship", recursively: false)
-            else { return }
+        //        print("hitTest coord: (",x, y, z, ")") #DEBUG
+
+        // Add wolf to the scene
+        let wolfScene = SCNScene(named: "art.scnassets/wolf.scn")!
+        let wolfNode = wolfScene.rootNode.childNode(withName: "wolf", recursively: true)!
+        //        print("wolfScene: ", wolfScene.rootNode.childNodes) #DEBUG
+        //        print("wolfNode: ", wolfScene) #DEBUG
         
         // Rotate the node according to camera (only horizontally)
         // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
         let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
-        let newRotation = SCNVector3Make(0, yaw ?? 0, 0) // if no yaw -> 0
-        shipNode.eulerAngles = newRotation
+        wolfNode.position = SCNVector3(x,y,z) // place right behind where the user tapped
+        wolfNode.rotation = SCNVector4(0, 1, 0, yaw ?? 0)
+        wolfNode.localTranslate(by: SCNVector3(0, 0, -0.3))
+
         
-        shipNode.position = SCNVector3(x,y,z)
-        sceneView.scene.rootNode.addChildNode(shipNode)
+        sceneView.scene.rootNode.addChildNode(wolfNode)
     }
     
     func session(_ session: ARSession, didFailWithError error: Error) {
