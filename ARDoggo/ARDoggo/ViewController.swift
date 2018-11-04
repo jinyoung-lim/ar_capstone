@@ -110,7 +110,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         planeNode.position = SCNVector3(x, y, z)
     }
     
-    
+//    func setUpWolfSkinner() {
+//
+//
+//    }
     
     @objc func addShipToSceneView(withGestureRecognizer recognizer: UIGestureRecognizer) {
         // Use the tap location to determine if on a plane
@@ -121,7 +124,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let x = translation.x
         let y = translation.y
         let z = translation.z
-        //        print("hitTest coord: (",x, y, z, ")") #DEBUG
+        print("hitTest coord: (",x, y, z, ")") //DEBUG
 
         // Add wolf to the scene
         let wolfScene = SCNScene(named: "art.scnassets/wolf.scn")!
@@ -133,10 +136,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
         let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
         wolfNode.position = SCNVector3(x,y,z) // place right behind where the user tapped
-        wolfNode.rotation = SCNVector4(0, 1, 0, yaw ?? 0)
-        wolfNode.localTranslate(by: SCNVector3(0, 0, -0.3))
-
+//        wolfNode.rotation = SCNVector4(1, 0, 0, 3.141592/2.0)
         
+        wolfNode.rotation = SCNVector4(0, 1, 0, yaw ?? 0)
+        
+        wolfNode.localTranslate(by: SCNVector3(0, 0, -0.3))
+        wolfNode.eulerAngles.x = 3.141592/2.0 // display wolf with "normal" orientation. After changing wolf.scn's node names, 90 degrees x-rotation happened (by accident?) and this "fixes" it. If model is fixed to have horizontal orientation, could delete this line.
+//        print(wolfScene.rootNode.skinner)
         sceneView.scene.rootNode.addChildNode(wolfNode)
     }
     
