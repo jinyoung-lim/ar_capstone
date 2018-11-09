@@ -26,10 +26,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-//        let scene = SCNScene(named: "art.scnassets/wolf_model_collada/Wolf_One_dae.dae")!
-//        sceneView.scene = scene
-        
-        
         // Enable lighting
         sceneView.autoenablesDefaultLighting = true
         sceneView.automaticallyUpdatesLighting = true
@@ -97,23 +93,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             let plane = planeNode.geometry as? SCNPlane // 3) Unwrap the node geometry
             else { return }
         
-        // Update plane geometry
+        // 2) Update plane geometry
         let width = CGFloat(planeAnchor.extent.x)
         let height = CGFloat(planeAnchor.extent.z)
         plane.width = width
         plane.height = height
         
-        // Update plane coordinates
+        // 3) Update plane coordinates
         let x = CGFloat(planeAnchor.center.x)
         let y = CGFloat(planeAnchor.center.y)
         let z = CGFloat(planeAnchor.center.z)
         planeNode.position = SCNVector3(x, y, z)
     }
-    
-//    func setUpWolfSkinner() {
-//
-//
-//    }
     
     @objc func addShipToSceneView(withGestureRecognizer recognizer: UIGestureRecognizer) {
         // Use the tap location to determine if on a plane
@@ -124,26 +115,57 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let x = translation.x
         let y = translation.y
         let z = translation.z
-        print("hitTest coord: (",x, y, z, ")") //DEBUG
+        //        print("hitTest coord: (",x, y, z, ")") // DEBUG
 
         // Add wolf to the scene
         let wolfScene = SCNScene(named: "art.scnassets/wolf.scn")!
         let wolfNode = wolfScene.rootNode.childNode(withName: "wolf", recursively: true)!
-        //        print("wolfScene: ", wolfScene.rootNode.childNodes) #DEBUG
-        //        print("wolfNode: ", wolfScene) #DEBUG
+        //        print("wolfScene: ", wolfScene.rootNode.childNodes) // DEBUG
+        //        print("wolfNode: ", wolfScene) // DEBUG
         
         // Rotate the node according to camera (only horizontally)
         // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
         let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
         wolfNode.position = SCNVector3(x,y,z) // place right behind where the user tapped
-//        wolfNode.rotation = SCNVector4(1, 0, 0, 3.141592/2.0)
-        
         wolfNode.rotation = SCNVector4(0, 1, 0, yaw ?? 0)
         
+        // Place the wolf a bit "behind" where the user taps
         wolfNode.localTranslate(by: SCNVector3(0, 0, -0.3))
-        wolfNode.eulerAngles.x = 3.141592/2.0 // display wolf with "normal" orientation. After changing wolf.scn's node names, 90 degrees x-rotation happened (by accident?) and this "fixes" it. If model is fixed to have horizontal orientation, could delete this line.
-//        print(wolfScene.rootNode.skinner)
-        sceneView.scene.rootNode.addChildNode(wolfNode)
+        
+        // Display wolf with "normal" orientation. After changing wolf.scn's node
+        // names, 90 degrees x-rotation happened (by accident?) and this "fixes" it.
+        // If model is fixed to have horizontal orientation, could delete this line.
+        if wolfNode.eulerAngles.x > 0 {
+            // prevent wolf to be upside down when adding to left to initial camera position
+            wolfNode.eulerAngles.x = -.pi/2.0
+        }
+        else {
+            wolfNode.eulerAngles.x = .pi/2.0
+        }
+        
+        // Set up wolf skinner
+        //----- SCNSkinner takes in these arguments start -----------------------------------------------------
+        // SCNSkinner.init(
+        //        baseGeometry: wolfBodyGeometry ?? nil,
+        //        bones: [SCNNode],
+        //        boneInverseBindTransforms: <#T##[NSValue]?#>,
+        //        boneWeights: SCNGeometrySource,
+        //        boneIndices: <#T##SCNGeometrySource#>
+        //        )
+        //----- SCNSkinner takes in these arguments end -------------------------------------------------------
+
+        let wolfSkeleton = wolfNode.childNode(withName: "skeleton", recursively: true)!
+        let wolfBody = wolfNode.childNode(withName: "body", recursively: true)!
+        let wolfBodyGeometry = wolfBody.geometry
+        
+        //        print(sceneView.scene.rootNode.childNodes) // DEBUG
+
+        //----- woldNode childNodes start -------------------------------------------------------------------
+        // [<SCNNode: 0x280c2e300 'skeleton' scale(1.000000 1.000000 1.000000) | 1 child>, <SCNNode: 0x280c11500 'body' scale(1.000000 1.000000 1.000000) | geometry=<SCNGeometry: 0x2846297c0 | 5 elements> | no child>]
+        //----- woldNode childNodes end ----------------------------------------------------------------------
+        
+        
+        sceneView.scene.rootNode.addChildNode(wolfNode) // Add wolf to the sceneView so that it is displayed
     }
     
     func session(_ session: ARSession, didFailWithError error: Error) {
@@ -158,8 +180,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
     }
     
-    // Detect tap gesture
     func addTapGestureToSceneView() {
+        // Detect tap gesture
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ViewController.addShipToSceneView(withGestureRecognizer:)))
         sceneView.addGestureRecognizer(tapGestureRecognizer)
     }
