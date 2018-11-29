@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		286F796B219DDDE70059658D /* ColladaRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286F796A219DDDE70059658D /* ColladaRig.swift */; };
 		28B87CE62188B5FE00E30162 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B87CE52188B5FE00E30162 /* AppDelegate.swift */; };
 		28B87CE82188B5FE00E30162 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 28B87CE72188B5FE00E30162 /* art.scnassets */; };
 		28B87CEA2188B5FE00E30162 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B87CE92188B5FE00E30162 /* ViewController.swift */; };
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		286F796A219DDDE70059658D /* ColladaRig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColladaRig.swift; sourceTree = "<group>"; };
 		28B87CE22188B5FE00E30162 /* ARDoggo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARDoggo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		28B87CE52188B5FE00E30162 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		28B87CE72188B5FE00E30162 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -106,6 +108,7 @@
 				28B87CEE2188B60100E30162 /* Assets.xcassets */,
 				28B87CF02188B60100E30162 /* LaunchScreen.storyboard */,
 				28B87CF32188B60100E30162 /* Info.plist */,
+				286F796A219DDDE70059658D /* ColladaRig.swift */,
 			);
 			path = ARDoggo;
 			sourceTree = "<group>";
@@ -262,6 +265,7 @@
 			files = (
 				28B87CEA2188B5FE00E30162 /* ViewController.swift in Sources */,
 				28B87CE62188B5FE00E30162 /* AppDelegate.swift in Sources */,
+				286F796B219DDDE70059658D /* ColladaRig.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
