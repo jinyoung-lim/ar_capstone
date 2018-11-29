@@ -15,6 +15,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet var sceneView: ARSCNView!
     var wolf_fur: ColladaRig?
     var tapGestureRecognizer: UITapGestureRecognizer?
+    var trackerNode: SCNNode!
+    var wolfIsPlaced = false
+    var planeIsDetected = false
+    var wolf: SCNNode!
+    var worldPos: SCNVector3!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,6 +57,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Pause the view's session
         sceneView.session.pause()
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        // Referred: Anyone Can Code ARGame Tutorial - Part 2 of 3 (www.youtube.com/watch?v=mOTrialE85Q)
+        // Return if plane is not detected
+        if wolfIsPlaced {
+            //do things with wolf
+        }
+        else {
+            guard planeIsDetected else { return }
+            trackerNode.removeFromParentNode()
+            wolfIsPlaced = true
+            wolf = sceneView.scene.rootNode.childNode(withName: "wolf", recursively: true)!
+            wolf.isHidden = false
+            wolf.position = worldPos
+        }
     }
     
     // MARK: - ARSCNViewDelegate
@@ -109,6 +130,27 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         planeNode.position = SCNVector3(x, y, z)
     }
     
+    // Look for a surface to place wolf
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        // Referred: Anyone Can Code ARKit Game Tutorial - Part 1 of 3
+        guard !wolfIsPlaced else { return }
+        // Do the hit test in the middle of the screen and get the closest hit test result if pass
+        guard let hitTest = sceneView.hitTest(CGPoint(x: view.frame.midX, y: view.frame.midY), types: [.estimatedHorizontalPlane, .existingPlane]).first else { return }
+        
+        // With the farthest hit test result, get the transformation matrix
+        let transMat = SCNMatrix4(hitTest.worldTransform)
+        worldPos = SCNVector3Make(transMat.m41, transMat.m42, transMat.m43)
+        
+        if !planeIsDetected {
+            let trackerPlane = SCNPlane(width: 0.5, height: 0.5)
+            trackerPlane.firstMaterial?.diffuse.contents = #imageLiteral(resourceName: "corgiTracker")
+            trackerNode = SCNNode(geometry: trackerPlane)
+            trackerNode.eulerAngles.x = -.pi/2.0 // make tracker horizontal
+        }
+        trackerNode.position = worldPos
+        sceneView.scene.rootNode.addChildNode(trackerNode)
+        planeIsDetected = true
+    }
     
     ///////////////////////////////////////////////////////////////////////////////////////////////
     /////////////                        Using .dae model                             /////////////
@@ -142,7 +184,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Use the tap location to determine if on a plane
         let hitPos = getHitTestPosVec(withGestureRecognizer: recognizer)
         
-        // Add wolf to the scene
+        // Extract wolf scene from .scn file and set up wolf node
         let wolfScene = SCNScene(named: "art.scnassets/wolf.scn")!
         let wolfNode = wolfScene.rootNode.childNode(withName: "wolf", recursively: true)!
         wolfNode.removeAllAnimations()
@@ -151,13 +193,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Rotate the node according to camera (only horizontally)
         // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
         let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
-
-        wolfNode.position = hitPos // place right behind where the user tapped
+        // place right behind where the user tapped
+        wolfNode.position = worldPos
         wolfNode.rotation = SCNVector4(0, 1, 0, yaw ?? 0)
-        
         // Place the wolf a bit "behind" where the user taps
         wolfNode.localTranslate(by: SCNVector3(0, -0.1, -0.3))
-        
         // Display wolf with "normal" orientation. After changing wolf.scn's node
         // names, 90 degrees x-rotation happened (by accident?) and this "fixes" it.
         // If model is fixed to have horizontal orientation, could delete this line.
@@ -169,31 +209,26 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             wolfNode.eulerAngles.x = .pi/2.0
         }
         
+        // Add wolf to the sceneView so that it is displayed
+        sceneView.scene.rootNode.addChildNode(wolfNode)
         
-        let wolfUrl = Bundle.main.url(forResource: "wolf", withExtension: "scn", subdirectory: "art.scnassets")!
-        let wolfSource = SCNSceneSource(url: wolfUrl, options: nil)
-        let wolfAnimation = SCNAnimation(contentsOf: wolfUrl)
-        print(wolfSource?.identifiersOfEntries(withClass: SCNNode.self))
-        print(wolfSource?.identifiersOfEntries(withClass: SCNAnimation.self))
-
-        let wolfBody = wolfSource?.entryWithIdentifier("wolf", withClass: SCNNode.self)
+        // Let wolf affected by physics
+        wolfNode.physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
         
-        wolfAnimation.duration = 100
-        wolfNode.addAnimation(wolfAnimation, forKey: "run")
-//        wolfNode.addChildNode(wolfRun)
-        sceneView.scene.rootNode.addChildNode(wolfNode) // Add wolf to the sceneView so that it is displayed
     }
     
-    
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////                          Move wolf                                  /////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    func walk(to: SCNVector3) {
+        wolf.look(at: to)
+        wolf.physicsBody?.applyForce(SCNVector3(0.0, 0.0, 2.0), asImpulse: true)
+    }
     
     
     ///////////////////////////////////////////////////////////////////////////////////////////////
     /////////////                     Hit Test and Tapping                            /////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    func getTapGestureRecognizer() -> UITapGestureRecognizer {
-        return tapGestureRecognizer!
-    }
-    
     @objc func getHitTestPosVec(withGestureRecognizer recognizer: UIGestureRecognizer) -> SCNVector3 {
         // Use the tap location to determine if on a plane
         let tapLocation = recognizer.location(in: sceneView)
@@ -216,6 +251,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Detect tap gesture
         tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ViewController.addModelToSceneView(withGestureRecognizer:)))
         sceneView.addGestureRecognizer(tapGestureRecognizer!)
+    }
+    
+    func getTapGestureRecognizer() -> UITapGestureRecognizer {
+        return tapGestureRecognizer!
     }
     
     
