@@ -11,11 +11,10 @@ import SceneKit
 import ARKit
 
 class ViewController: UIViewController, ARSCNViewDelegate {
-    
+    // Set up global variables
     @IBOutlet var sceneView: ARSCNView!
     var wolf_fur: ColladaRig?
     var tapGestureRecognizer: UITapGestureRecognizer?
-//    var animations = [String: SCNAnimation]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,7 +35,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Recognize tap gesture
         addTapGestureToSceneView()
     }
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -49,8 +47,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Run the view's session
         sceneView.session.run(configuration)
     }
-    
-    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
@@ -60,6 +56,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     // MARK: - ARSCNViewDelegate
     
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////                            Renderers                                /////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     // Override to create and configure nodes for anchors added to the view's session.
     // Visualize horizontal planes refer: https://www.appcoda.com/arkit-horizontal-plane/
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
@@ -109,14 +109,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         planeNode.position = SCNVector3(x, y, z)
     }
     
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////                        Using .dae model                             /////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Add model from a Collada file to the scene
     @objc func addColladaModelToSceneView(withGestureRecognizer recognizer: UIGestureRecognizer) {
         let hitPos = getHitTestPosVec(withGestureRecognizer: recognizer)
         setupColladaModel(position: hitPos)
         print(hitPos)
     }
-    
+    // Set up animation and model of a collada (.dae) model using ColladaRig.swift
     func setupColladaModel(position: SCNVector3) {
-        // Set up animation and model of a collada (.dae) model using ColladaRig.swift
         // Referred:
         //     GameViewController.swift
         //     RunningMan
@@ -131,24 +135,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     
     
-    @objc func getHitTestPosVec(withGestureRecognizer recognizer: UIGestureRecognizer) -> SCNVector3 {
-        // Use the tap location to determine if on a plane
-        let tapLocation = recognizer.location(in: sceneView)
-        let hitTestResults = sceneView.hitTest(tapLocation, types: .existingPlaneUsingExtent)
-        guard let hitTestResult = hitTestResults.first else { return SCNVector3(0,0,0) } //TODO: think about failure return behavior
-        let translation = hitTestResult.worldTransform.columns.3
-        let x = translation.x
-        let y = translation.y
-        let z = translation.z
-        //        print("hitTest coord: (",x, y, z, ")") // DEBUG
-        
-        // Rotate the node according to camera (only horizontally)
-        // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
-//        let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
-        
-        return SCNVector3(x, y, z)
-    }
-    
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////                       Using .scn model                              /////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     @objc func addModelToSceneView(withGestureRecognizer recognizer: UIGestureRecognizer) {
         // Use the tap location to determine if on a plane
         let hitPos = getHitTestPosVec(withGestureRecognizer: recognizer)
@@ -158,59 +147,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let wolfNode = wolfScene.rootNode.childNode(withName: "wolf", recursively: true)!
         wolfNode.removeAllAnimations()
         wolfNode.removeAllActions()
-//        let wolfUrl = Bundle.main.url(forResource: "wolf", withExtension: "scn", subdirectory: "art.scnassets")!
-//        let wolfSource = SCNSceneSource(url: wolfUrl, options: nil)!
-//        let wolfRun = SCNAnimation(wolfScene.rootNode.childNode(withName: "run2", recursively: true)!)
-//        let wolfAnimation = SCNAnimation(contentsOf: wolfUrl)
-//        animations["run"] = wolfAnimation
-//        let wolfRun = wolfScene.rootNode.childNode(withName: "run2", recursively: true)!
-        
-        // Rotate the node according to camera (only horizontally)
-        // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
-//        let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
-//
-//        //working model
-//        wolfNode.position = hitPos // place right behind where the user tapped
-//        wolfNode.rotation = SCNVector4(0, 1, 0, yaw ?? 0)
-//
-//        // Place the wolf a bit "behind" where the user taps
-//        wolfNode.localTranslate(by: SCNVector3(0, -0.1, -0.3))
-//
-//        // Display wolf with "normal" orientation. After changing wolf.scn's node
-//        // names, 90 degrees x-rotation happened (by accident?) and this "fixes" it.
-//        // If model is fixed to have horizontal orientation, could delete this line.
-//        if wolfNode.eulerAngles.x > 0 {
-//            // prevent wolf to be upside down when adding to left to initial camera position
-//            wolfNode.eulerAngles.x = -.pi/2.0
-//        }
-//        else {
-//            wolfNode.eulerAngles.x = .pi/2.0
-//        }
-//        sceneView.scene.rootNode.addChildNode(wolfNode) // Add wolf to the sceneView so that it is displayed
-        
         
         // Rotate the node according to camera (only horizontally)
         // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
         let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
-        
-        //working model
-//        wolfRun.position = hitPos // place right behind where the user tapped
-//        wolfRun.rotation = SCNVector4(0, 1, 0, yaw ?? 0)
-//
-//        // Place the wolf a bit "behind" where the user taps
-//        wolfRun.localTranslate(by: SCNVector3(0, -0.1, -0.3))
-//
-//        // Display wolf with "normal" orientation. After changing wolf.scn's node
-//        // names, 90 degrees x-rotation happened (by accident?) and this "fixes" it.
-//        // If model is fixed to have horizontal orientation, could delete this line.
-//        if wolfRun.eulerAngles.x > 0 {
-//            // prevent wolf to be upside down when adding to left to initial camera position
-//            wolfRun.eulerAngles.x = -.pi/2.0
-//        }
-//        else {
-//            wolfRun.eulerAngles.x = .pi/2.0
-//        }
-        
+
         wolfNode.position = hitPos // place right behind where the user tapped
         wolfNode.rotation = SCNVector4(0, 1, 0, yaw ?? 0)
         
@@ -243,6 +184,44 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.scene.rootNode.addChildNode(wolfNode) // Add wolf to the sceneView so that it is displayed
     }
     
+    
+    
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////                     Hit Test and Tapping                            /////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    func getTapGestureRecognizer() -> UITapGestureRecognizer {
+        return tapGestureRecognizer!
+    }
+    
+    @objc func getHitTestPosVec(withGestureRecognizer recognizer: UIGestureRecognizer) -> SCNVector3 {
+        // Use the tap location to determine if on a plane
+        let tapLocation = recognizer.location(in: sceneView)
+        let hitTestResults = sceneView.hitTest(tapLocation, types: .existingPlaneUsingExtent)
+        guard let hitTestResult = hitTestResults.first else { return SCNVector3(0,0,0) } //TODO: think about failure return behavior
+        let translation = hitTestResult.worldTransform.columns.3
+        let x = translation.x
+        let y = translation.y
+        let z = translation.z
+        //        print("hitTest coord: (",x, y, z, ")") // DEBUG
+        
+        // Rotate the node according to camera (only horizontally)
+        // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
+        //        let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
+        
+        return SCNVector3(x, y, z)
+    }
+    
+    func addTapGestureToSceneView() {
+        // Detect tap gesture
+        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ViewController.addModelToSceneView(withGestureRecognizer:)))
+        sceneView.addGestureRecognizer(tapGestureRecognizer!)
+    }
+    
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////                            Others                                   /////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
     }
@@ -253,16 +232,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
-    }
-    
-    func getTapGestureRecognizer() -> UITapGestureRecognizer {
-        return tapGestureRecognizer!
-    }
-    
-    func addTapGestureToSceneView() {
-        // Detect tap gesture
-        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ViewController.addModelToSceneView(withGestureRecognizer:)))
-        sceneView.addGestureRecognizer(tapGestureRecognizer!)
     }
 }
 
