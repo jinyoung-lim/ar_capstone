@@ -20,6 +20,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var planeIsDetected = false
     var wolf: SCNNode!
     var worldPos: SCNVector3!
+    var cameraYaw: Float!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,7 +39,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.automaticallyUpdatesLighting = true
         
         // Recognize tap gesture
-        addTapGestureToSceneView()
+//        addTapGestureToSceneView()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -68,10 +69,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         else {
             guard planeIsDetected else { return }
             trackerNode.removeFromParentNode()
+//            wolf = sceneView.scene.rootNode.childNode(withName: "wolf", recursively: true)!
+//            wolf.isHidden = false
+//            wolf.position = worldPos
+//            wolfIsPlaced = true
+            addModelToSceneView()
             wolfIsPlaced = true
-            wolf = sceneView.scene.rootNode.childNode(withName: "wolf", recursively: true)!
-            wolf.isHidden = false
-            wolf.position = worldPos
         }
     }
     
@@ -104,6 +107,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let z = CGFloat(planeAnchor.center.z)
         planeNode.position = SCNVector3(x,y,z)
         planeNode.eulerAngles.x = -.pi / 2
+        
+        planeNode.isHidden = true
         
         // Add the plane node as a SceneKit
         node.addChildNode(planeNode)
@@ -144,9 +149,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             else { return }
         
         
-        // With the farthest hit test result, get the transformation matrix
-        let transMat = SCNMatrix4(hitTest.worldTransform)
-        worldPos = SCNVector3Make(transMat.m41, transMat.m42, transMat.m43)
+        
         
         if !planeIsDetected { // only runs once
             let trackerPlane = SCNPlane(width: 0.5, height: 0.5)
@@ -159,9 +162,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         
         // runs constantly
+        // With the farthest hit test result, get the transformation matrix
+        let transMat = SCNMatrix4(hitTest.worldTransform)
+        worldPos = SCNVector3Make(transMat.m41, transMat.m42, transMat.m43)
         trackerNode.position = worldPos
-        let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
-        trackerNode.eulerAngles.y = yaw!
+        cameraYaw = sceneView.session.currentFrame?.camera.eulerAngles.y
+        trackerNode.eulerAngles.y = cameraYaw!
         sceneView.scene.rootNode.addChildNode(trackerNode)
     }
     
@@ -193,41 +199,40 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     /////////////                       Using .scn model                              /////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    @objc func addModelToSceneView(withGestureRecognizer recognizer: UIGestureRecognizer) {
+    @objc func addModelToSceneView() {
         // Use the tap location to determine if on a plane
-        let hitPos = getHitTestPosVec(withGestureRecognizer: recognizer)
         
         // Extract wolf scene from .scn file and set up wolf node
         let wolfScene = SCNScene(named: "art.scnassets/wolf.scn")!
-        let wolfNode = wolfScene.rootNode.childNode(withName: "wolf", recursively: true)!
-        wolfNode.removeAllAnimations()
-        wolfNode.removeAllActions()
+        wolf = wolfScene.rootNode.childNode(withName: "wolf", recursively: true)!
+        wolf.removeAllAnimations()
+        wolf.removeAllActions()
         
         // Rotate the node according to camera (only horizontally)
         // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
-        let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
         // place right behind where the user tapped
-        wolfNode.position = worldPos
-        wolfNode.rotation = SCNVector4(0, 1, 0, yaw ?? 0)
+        wolf.scale = SCNVector3(0.4, 0.4, 0.4) // scale down the wolf
+        wolf.position = worldPos
+        wolf.rotation = SCNVector4(0, 1, 0, cameraYaw)
         // Place the wolf a bit "behind" where the user taps
-        wolfNode.localTranslate(by: SCNVector3(0, -0.1, -0.3))
+        wolf.localTranslate(by: SCNVector3(0, 0, 0))
         // Display wolf with "normal" orientation. After changing wolf.scn's node
         // names, 90 degrees x-rotation happened (by accident?) and this "fixes" it.
         // If model is fixed to have horizontal orientation, could delete this line.
-        if wolfNode.eulerAngles.x > 0 {
+        if wolf.eulerAngles.x > 0 {
             // prevent wolf to be upside down when adding to left to initial camera position
-            wolfNode.eulerAngles.x = -.pi/2.0
+            wolf.eulerAngles.x = -.pi/2.0
         }
         else {
-            wolfNode.eulerAngles.x = .pi/2.0
+            wolf.eulerAngles.x = .pi/2.0
         }
         
         // Add wolf to the sceneView so that it is displayed
-        sceneView.scene.rootNode.addChildNode(wolfNode)
-        
+        wolf.isHidden = false
+        sceneView.scene.rootNode.addChildNode(wolf)
+//        walk(to: SCNVector3(0, -50, 0))
         // Let wolf affected by physics
-        wolfNode.physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
-        
+//        wolf.physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
     }
     
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,6 +241,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func walk(to: SCNVector3) {
         wolf.look(at: to)
         wolf.physicsBody?.applyForce(SCNVector3(0.0, 0.0, 2.0), asImpulse: true)
+//        wolf.look(at: SCNVector3(0, 0, cameraYaw))
+//        sceneView.scene.rootNode.addChildNode(wolf)
     }
     
     
@@ -260,11 +267,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return SCNVector3(x, y, z)
     }
     
-    func addTapGestureToSceneView() {
-        // Detect tap gesture
-        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ViewController.addModelToSceneView(withGestureRecognizer:)))
-        sceneView.addGestureRecognizer(tapGestureRecognizer!)
-    }
+//    func addTapGestureToSceneView() {
+//        // Detect tap gesture
+//        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ViewController.addModelToSceneView(withGestureRecognizer:)))
+//        sceneView.addGestureRecognizer(tapGestureRecognizer!)
+//    }
     
     func getTapGestureRecognizer() -> UITapGestureRecognizer {
         return tapGestureRecognizer!
