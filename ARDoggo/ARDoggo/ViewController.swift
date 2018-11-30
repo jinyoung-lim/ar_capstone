@@ -134,22 +134,35 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         // Referred: Anyone Can Code ARKit Game Tutorial - Part 1 of 3
         guard !wolfIsPlaced else { return }
+        
         // Do the hit test in the middle of the screen and get the closest hit test result if pass
-        guard let hitTest = sceneView.hitTest(CGPoint(x: view.frame.midX, y: view.frame.midY), types: [.estimatedHorizontalPlane, .existingPlane]).first else { return }
+        guard let hitTest = sceneView.hitTest(
+            CGPoint(x: view.frame.midX, y: view.frame.midY),
+            types: [.featurePoint, .existingPlane]
+            )
+            .first
+            else { return }
+        
         
         // With the farthest hit test result, get the transformation matrix
         let transMat = SCNMatrix4(hitTest.worldTransform)
         worldPos = SCNVector3Make(transMat.m41, transMat.m42, transMat.m43)
         
-        if !planeIsDetected {
+        if !planeIsDetected { // only runs once
             let trackerPlane = SCNPlane(width: 0.5, height: 0.5)
             trackerPlane.firstMaterial?.diffuse.contents = #imageLiteral(resourceName: "corgiTracker")
             trackerNode = SCNNode(geometry: trackerPlane)
+            
+//            trackerNode.rotation = SCNVector4(0, yaw ?? 0, 0, 0)
             trackerNode.eulerAngles.x = -.pi/2.0 // make tracker horizontal
+            planeIsDetected = true
         }
+        
+        // runs constantly
         trackerNode.position = worldPos
+        let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
+        trackerNode.eulerAngles.y = yaw!
         sceneView.scene.rootNode.addChildNode(trackerNode)
-        planeIsDetected = true
     }
     
     ///////////////////////////////////////////////////////////////////////////////////////////////
