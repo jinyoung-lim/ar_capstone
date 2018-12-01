@@ -19,6 +19,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var wolfIsPlaced = false
     var planeIsDetected = false
     var wolf: SCNNode!
+    var wolfScale = 0.6
     var worldPos: SCNVector3!
     var cameraYaw: Float!
     
@@ -69,17 +70,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         else {
             guard planeIsDetected else { return }
             trackerNode.removeFromParentNode()
-//            wolf = sceneView.scene.rootNode.childNode(withName: "wolf", recursively: true)!
-//            wolf.isHidden = false
-//            wolf.position = worldPos
-//            wolfIsPlaced = true
             addModelToSceneView()
             wolfIsPlaced = true
         }
     }
     
     // MARK: - ARSCNViewDelegate
-    
     
     ///////////////////////////////////////////////////////////////////////////////////////////////
     /////////////                            Renderers                                /////////////
@@ -172,29 +168,42 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////                        Using .dae model                             /////////////
+    /////////////                          Move wolf                                  /////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Add model from a Collada file to the scene
-    @objc func addColladaModelToSceneView(withGestureRecognizer recognizer: UIGestureRecognizer) {
-        let hitPos = getHitTestPosVec(withGestureRecognizer: recognizer)
-        setupColladaModel(position: hitPos)
-        print(hitPos)
+    func walk(to: SCNVector3, duration: Float) {
+        let toVec = SCNVector3(wolf.position.x+3.0, wolf.position.y, wolf.position.z+3.0)
+        let walkAction = SCNAction.sequence([
+            SCNAction.rotateTo(
+                x:0.0, y:CGFloat(toVec.x), z:0,
+                duration: 2.0
+            ),
+            SCNAction.move(
+                to: toVec,
+                duration: TimeInterval(duration)
+            )]
+        )
+        wolf.runAction(walkAction, forKey: "walk_to")
     }
-    // Set up animation and model of a collada (.dae) model using ColladaRig.swift
-    func setupColladaModel(position: SCNVector3) {
-        // Referred:
-        //     GameViewController.swift
-        //     RunningMan
-        //     Created by Oliver Dew on 01/06/2016.
-        //     Copyright (c) 2016 Salt Pig. All rights reserved.
+    
+    func walk(direction: SCNVector3, duration: Float) {
+//        wolf.look(at: direction)
+//        wolf.physicsBody?.applyForce(SCNVector3(0.0, 0.0, 5.0), asImpulse: true)
+        //        wolf.look(at: SCNVector3(0, 0, cameraYaw))
+        //        sceneView.scene.rootNode.addChildNode(wolf)
+        let walkAction = SCNAction.sequence([
+            SCNAction.rotateBy(
+                x: 0.0, y: 1.0, z: 0.0,
+                duration: 2.0
+            ),
+            SCNAction.move(
+                by: SCNVector3(1.0, 0.0, 0.0),
+                duration: TimeInterval(duration)
+            )]
+        )
+        wolf.runAction(walkAction, forKey: "walk_dir")
         
-        wolf_fur = ColladaRig(modelNamed: "Wolf_obj_fur" , daeNamed: "wolf_dae", position: position)
-        wolf_fur!.loadAnimation(withKey: "run2", daeNamed: "wolf_dae")
-        sceneView.scene.rootNode.addChildNode(wolf_fur!.modelNode)
-        //TODO: fix model's position only being origin
+//        Timer.scheduledTimer(timeInterval: 5.0, target: <#T##Any#>, selector: <#T##Selector#>, userInfo: <#T##Any?#>, repeats: <#T##Bool#>)
     }
-    
-    
     
     ///////////////////////////////////////////////////////////////////////////////////////////////
     /////////////                       Using .scn model                              /////////////
@@ -211,11 +220,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Rotate the node according to camera (only horizontally)
         // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
         // place right behind where the user tapped
-        wolf.scale = SCNVector3(0.4, 0.4, 0.4) // scale down the wolf
-        wolf.position = worldPos
+        wolf.scale = SCNVector3(wolfScale, wolfScale, wolfScale) // scale down the wolf
         wolf.rotation = SCNVector4(0, 1, 0, cameraYaw)
+        wolf.position = worldPos
         // Place the wolf a bit "behind" where the user taps
-        wolf.localTranslate(by: SCNVector3(0, 0, 0))
+        wolf.localTranslate(by: SCNVector3(0, 0, 0.17*wolfScale))
         // Display wolf with "normal" orientation. After changing wolf.scn's node
         // names, 90 degrees x-rotation happened (by accident?) and this "fixes" it.
         // If model is fixed to have horizontal orientation, could delete this line.
@@ -231,18 +240,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         wolf.isHidden = false
         sceneView.scene.rootNode.addChildNode(wolf)
 //        walk(to: SCNVector3(0, -50, 0))
+        
         // Let wolf affected by physics
-//        wolf.physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
-    }
-    
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////                          Move wolf                                  /////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    func walk(to: SCNVector3) {
-        wolf.look(at: to)
-        wolf.physicsBody?.applyForce(SCNVector3(0.0, 0.0, 2.0), asImpulse: true)
-//        wolf.look(at: SCNVector3(0, 0, cameraYaw))
-//        sceneView.scene.rootNode.addChildNode(wolf)
+        wolf.physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
+        wolf.physicsBody?.isAffectedByGravity = false
+        
+//        walk(direction: SCNVector3(0.0, 1.0, 0.0), duration: 5.0)
+        walk(to: SCNVector3(0,0,0), duration:5.0)
+//        wolf.removeAction(forKey: "walk")
     }
     
     
