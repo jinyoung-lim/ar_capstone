@@ -11,7 +11,7 @@ import SceneKit
 import ARKit
 
 class ViewController: UIViewController, ARSCNViewDelegate {
-    // Set up global variables
+    // MARK: - global variables
     @IBOutlet var sceneView: ARSCNView!
     var wolf_fur: ColladaRig?
     var tapGestureRecognizer: UITapGestureRecognizer?
@@ -23,6 +23,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var worldPos: SCNVector3!
     var cameraYaw: Float!
     
+    //MARK: - buttons
+    @IBAction func onComeHereButton(_ sender: Any) {
+    }
+    
+    
+    // MARK: - ARSCNViewDelegate
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -38,9 +45,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Enable lighting
         sceneView.autoenablesDefaultLighting = true
         sceneView.automaticallyUpdatesLighting = true
-        
-        // Recognize tap gesture
-//        addTapGestureToSceneView()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -75,11 +79,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
-    // MARK: - ARSCNViewDelegate
+    //Mark: - renderers
     
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////                            Renderers                                /////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////////
     // Override to create and configure nodes for anchors added to the view's session.
     // Visualize horizontal planes refer: https://www.appcoda.com/arkit-horizontal-plane/
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
@@ -148,6 +149,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         
         if !planeIsDetected { // only runs once
+            
+            
             let trackerPlane = SCNPlane(width: 0.5, height: 0.5)
             trackerPlane.firstMaterial?.diffuse.contents = #imageLiteral(resourceName: "corgiTracker")
             trackerNode = SCNNode(geometry: trackerPlane)
@@ -170,16 +173,20 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     /////////////                          Move wolf                                  /////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    func walk(to: SCNVector3, duration: Float) {
+    func walk(to: SCNVector3, duration: Double) {
         let toVec = SCNVector3(wolf.position.x+3.0, wolf.position.y, wolf.position.z+3.0)
+        let moveAngle: Float = .pi/4.0
+        let startAngle = wolf.eulerAngles.y
         let walkAction = SCNAction.sequence([
-            SCNAction.rotateTo(
-                x:0.0, y:CGFloat(toVec.x), z:0,
-                duration: 2.0
-            ),
+            SCNAction.customAction(
+                duration: duration*0.2,
+                action: { (node, elapsedTime) in
+                    let percentage: Float = Float(elapsedTime) / Float(duration*0.2)
+                    node.eulerAngles.y = startAngle + moveAngle * percentage
+            }),
             SCNAction.move(
                 to: toVec,
-                duration: TimeInterval(duration)
+                duration: duration*0.8
             )]
         )
         wolf.runAction(walkAction, forKey: "walk_to")
@@ -201,13 +208,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             )]
         )
         wolf.runAction(walkAction, forKey: "walk_dir")
-        
-//        Timer.scheduledTimer(timeInterval: 5.0, target: <#T##Any#>, selector: <#T##Selector#>, userInfo: <#T##Any?#>, repeats: <#T##Bool#>)
     }
     
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////                       Using .scn model                              /////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //Mark: - using .scn model
     @objc func addModelToSceneView() {
         // Use the tap location to determine if on a plane
         
@@ -238,6 +241,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Add wolf to the sceneView so that it is displayed
         wolf.isHidden = false
+        
         sceneView.scene.rootNode.addChildNode(wolf)
 //        walk(to: SCNVector3(0, -50, 0))
         
@@ -251,9 +255,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////                     Hit Test and Tapping                            /////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //MARK: - hit test and tapping
     @objc func getHitTestPosVec(withGestureRecognizer recognizer: UIGestureRecognizer) -> SCNVector3 {
         // Use the tap location to determine if on a plane
         let tapLocation = recognizer.location(in: sceneView)
@@ -272,20 +274,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return SCNVector3(x, y, z)
     }
     
-//    func addTapGestureToSceneView() {
-//        // Detect tap gesture
-//        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ViewController.addModelToSceneView(withGestureRecognizer:)))
-//        sceneView.addGestureRecognizer(tapGestureRecognizer!)
-//    }
-    
     func getTapGestureRecognizer() -> UITapGestureRecognizer {
         return tapGestureRecognizer!
     }
     
     
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////                            Others                                   /////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //MARK: - others
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
     }
@@ -298,17 +292,3 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
     }
 }
-
-
-//ColladaRig stuff
-//gestureRecognizers: Optional([
-//<UILongPressGestureRecognizer: 0x1042192f0; state = Possible; enabled = NO; cancelsTouchesInView = NO; view = <ARSCNView 0x104211f50>; target= <(action=_handlePress:, target=<SCNCameraNavigationController 0x104218f90>)>>, <UIPanGestureRecognizer: 0x1042197d0; state = Possible; enabled = NO; cancelsTouchesInView = NO; view = <ARSCNView 0x104211f50>; target= <(action=_handlePan:, target=<SCNCameraNavigationController 0x104218f90>)>>,
-//<UITapGestureRecognizer: 0x2828fee00; state = Possible; enabled = NO; cancelsTouchesInView = NO; view = <ARSCNView 0x104211f50>; target= <(action=_handleDoubleTap:, target=<SCNCameraNavigationController 0x104218f90>)>; numberOfTapsRequired = 2>, <UIPinchGestureRecognizer: 0x104219660; state = Possible; enabled = NO; cancelsTouchesInView = NO; view = <ARSCNView 0x104211f50>; target= <(action=_handlePinch:, target=<SCNCameraNavigationController 0x104218f90>)>>,
-//<UIRotationGestureRecognizer: 0x104219950; state = Possible; enabled = NO; cancelsTouchesInView = NO; view = <ARSCNView 0x104211f50>; target= <(action=_handleRotation:, target=<SCNCameraNavigationController 0x104218f90>)>>, <UITapGestureRecognizer: 0x2828f5b00; state = Ended; view = <ARSCNView 0x104211f50>; target= <(action=addColladaModelToSceneViewWithGestureRecognizer:, target=<ARDoggo.ViewController 0x104210110>)>>])
-
-//sceneSource:  <SCNSceneSource: 0x282718ba0 | URL='file:///var/containers/Bundle/Application/105AE83D-24C2-40D1-BF75-E00E75B38D39/ARDoggo.app/art.scnassets/wolf_dae.dae'>
-
-
-//identifiersOfEntry
-//["Becken", "Maulunten", "Braun_O_R", "Bauch", "Vorderpfote_L", "Mauloben", "Bauch_001", "aug_lied_O_L", "Brust", "Schalterplatte_R", "MundW_L", "Hals", "aug_lied_O_R", "Unterschenkel_L", "Oberarm_R", "MundW_R", "Kopf_002", "aug_lied_U_L", "Kopf", "Unterarm_R", "Aug_R", "Pfote1_L", "aug_lied_U_R", "Pfote2_L", "Vorderpfote_R", "aug_L", "Oberschenkel_R", "Bauch_003", "Schwanz", "Ohr_L", "Unterschenkel_R", "Schalterplatte_L", "Schwanz_001", "Ohr_R", "Pfote1_R", "Oberarm_L", "Schwanz_002", "Pfote2_R", "Unterarm_L", "Schwanz_003", "root", "Oberschenkel_L", "Wolf_obj_fur", "Wolf_obj_body", "Unterkiefer", "node/46", "Hals_fett", "run2", "Braun_O_L"]
-
