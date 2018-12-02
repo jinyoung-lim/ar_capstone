@@ -24,12 +24,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var cameraYaw: Float!
     
     //MARK: - buttons
-    @IBAction func onComeHereButton(_ sender: Any) {
+    @IBAction func onComeHereButton(_ sender: UIButton) {
+//        let centerPos = getUserPosVec()
+        let deltaX = worldPos.x - wolf.position.x
+        let deltaZ = worldPos.z - wolf.position.z
+        let dist = sqrt(deltaX*deltaX + deltaZ*deltaZ)
+        print("dist between user and wolf", dist)
+        walk(to: worldPos, duration: Double(dist))
     }
     
     
+    
     // MARK: - ARSCNViewDelegate
-
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -37,7 +43,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.delegate = self
         
         // Set the debuging options
-        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints, ARSCNDebugOptions.showWorldOrigin]
+        sceneView.debugOptions = [
+            ARSCNDebugOptions.showFeaturePoints,
+            ARSCNDebugOptions.showWorldOrigin
+        ]
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
@@ -86,31 +95,31 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         // Unwrap the anchor as an ARPlaneAnchor
         guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
-        
+
         // Get the anchor dimension
         let width = CGFloat(planeAnchor.extent.x)
         let height = CGFloat(planeAnchor.extent.z)
         let plane = SCNPlane(width: width, height: height)
-        
+
         // Set the color of the plane
         plane.materials.first?.diffuse.contents = UIColor.magenta
-        
+
         // Initialize a SCNNode with the geometry we got
         let planeNode = SCNNode(geometry: plane)
-        
+
         // Initialize coordinates of the plane
         let x = CGFloat(planeAnchor.center.x)
         let y = CGFloat(planeAnchor.center.y)
         let z = CGFloat(planeAnchor.center.z)
         planeNode.position = SCNVector3(x,y,z)
         planeNode.eulerAngles.x = -.pi / 2
-        
+
         planeNode.isHidden = true
-        
+
         // Add the plane node as a SceneKit
         node.addChildNode(planeNode)
     }
-    
+
     // Renderer to expand the horizontal planes
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         // 1) Unwrap the plane anchor as ARPlaneAnchor
@@ -118,13 +127,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             let planeNode = node.childNodes.first, // 2) Unwrap the first plane node
             let plane = planeNode.geometry as? SCNPlane // 3) Unwrap the node geometry
             else { return }
-        
+
         // 2) Update plane geometry
         let width = CGFloat(planeAnchor.extent.x)
         let height = CGFloat(planeAnchor.extent.z)
         plane.width = width
         plane.height = height
-        
+
         // 3) Update plane coordinates
         let x = CGFloat(planeAnchor.center.x)
         let y = CGFloat(planeAnchor.center.y)
@@ -132,71 +141,68 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         planeNode.position = SCNVector3(x, y, z)
     }
     
+    
     // Look for a surface to place wolf
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        //TODO: time is not used! replace renderer that doesn't use time
         // Referred: Anyone Can Code ARKit Game Tutorial - Part 1 of 3
-        guard !wolfIsPlaced else { return }
-        
-        // Do the hit test in the middle of the screen and get the closest hit test result if pass
+        // Update worldPos and cameraYaw constantly
         guard let hitTest = sceneView.hitTest(
-            CGPoint(x: view.frame.midX, y: view.frame.midY),
+            CGPoint(x: sceneView.frame.midX, y: sceneView.frame.midY),
             types: [.featurePoint, .existingPlane]
             )
             .first
             else { return }
+        let transMat = SCNMatrix4(hitTest.worldTransform)
+        worldPos = SCNVector3Make(transMat.m41, transMat.m42, transMat.m43)
+        cameraYaw = sceneView.session.currentFrame?.camera.eulerAngles.y
         
-        
-        
-        
+        // Run below only if wolf is not placed
+        guard !wolfIsPlaced else { return }
         if !planeIsDetected { // only runs once
-            
-            
             let trackerPlane = SCNPlane(width: 0.5, height: 0.5)
             trackerPlane.firstMaterial?.diffuse.contents = #imageLiteral(resourceName: "corgiTracker")
             trackerNode = SCNNode(geometry: trackerPlane)
             
-//            trackerNode.rotation = SCNVector4(0, yaw ?? 0, 0, 0)
             trackerNode.eulerAngles.x = -.pi/2.0 // make tracker horizontal
             planeIsDetected = true
         }
-        
-        // runs constantly
-        // With the farthest hit test result, get the transformation matrix
-        let transMat = SCNMatrix4(hitTest.worldTransform)
-        worldPos = SCNVector3Make(transMat.m41, transMat.m42, transMat.m43)
         trackerNode.position = worldPos
-        cameraYaw = sceneView.session.currentFrame?.camera.eulerAngles.y
         trackerNode.eulerAngles.y = cameraYaw!
         sceneView.scene.rootNode.addChildNode(trackerNode)
+        
     }
     
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////                          Move wolf                                  /////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //MARK: - wolf actions
     func walk(to: SCNVector3, duration: Double) {
-        let toVec = SCNVector3(wolf.position.x+3.0, wolf.position.y, wolf.position.z+3.0)
-        let moveAngle: Float = .pi/4.0
-        let startAngle = wolf.eulerAngles.y
+        let moveAngle: Float = cameraYaw
+        var startAngle = wolf.eulerAngles.y
+//        if (startAngle > moveAngle) {
+//            startAngle *= -1
+//        }
+        let interAngle = startAngle + moveAngle
         let walkAction = SCNAction.sequence([
             SCNAction.customAction(
                 duration: duration*0.2,
-                action: { (node, elapsedTime) in
+                action: {(node, elapsedTime) in
                     let percentage: Float = Float(elapsedTime) / Float(duration*0.2)
                     node.eulerAngles.y = startAngle + moveAngle * percentage
             }),
             SCNAction.move(
-                to: toVec,
-                duration: duration*0.8
-            )]
+                to: to,
+                duration: duration*0.6
+            ),
+            SCNAction.customAction(
+                duration: duration*0.2,
+                action: {(node, elapsedTime) in
+                    let percentage: Float = Float(elapsedTime) / Float(duration*0.2)
+                    node.eulerAngles.y = interAngle - startAngle * percentage
+            })]
         )
         wolf.runAction(walkAction, forKey: "walk_to")
     }
     
     func walk(direction: SCNVector3, duration: Float) {
-//        wolf.look(at: direction)
-//        wolf.physicsBody?.applyForce(SCNVector3(0.0, 0.0, 5.0), asImpulse: true)
-        //        wolf.look(at: SCNVector3(0, 0, cameraYaw))
-        //        sceneView.scene.rootNode.addChildNode(wolf)
         let walkAction = SCNAction.sequence([
             SCNAction.rotateBy(
                 x: 0.0, y: 1.0, z: 0.0,
@@ -243,35 +249,36 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         wolf.isHidden = false
         
         sceneView.scene.rootNode.addChildNode(wolf)
-//        walk(to: SCNVector3(0, -50, 0))
         
         // Let wolf affected by physics
         wolf.physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
         wolf.physicsBody?.isAffectedByGravity = false
-        
-//        walk(direction: SCNVector3(0.0, 1.0, 0.0), duration: 5.0)
-        walk(to: SCNVector3(0,0,0), duration:5.0)
-//        wolf.removeAction(forKey: "walk")
     }
     
-    
+
     //MARK: - hit test and tapping
-    @objc func getHitTestPosVec(withGestureRecognizer recognizer: UIGestureRecognizer) -> SCNVector3 {
+    func getUserPosVec() -> SCNVector3 {
+        print("worldPos: ", worldPos)
+        guard let hitTest = sceneView.hitTest(
+            CGPoint(x: CGFloat(worldPos.x), y: CGFloat(worldPos.z)),
+            types: [.featurePoint, .existingPlane]
+        )
+        .first
+        else { return SCNVector3(0, 0, 0) }
+        let translation = hitTest.worldTransform.columns.3
+        return SCNVector3(translation.x, translation.y, translation.z)
+    }
+    
+    @objc func getScreenTapPosVec(withGestureRecognizer recognizer: UIGestureRecognizer) -> SCNVector3 {
         // Use the tap location to determine if on a plane
         let tapLocation = recognizer.location(in: sceneView)
-        let hitTestResults = sceneView.hitTest(tapLocation, types: .existingPlaneUsingExtent)
-        guard let hitTestResult = hitTestResults.first else { return SCNVector3(0,0,0) } //TODO: think about failure return behavior
-        let translation = hitTestResult.worldTransform.columns.3
-        let x = translation.x
-        let y = translation.y
-        let z = translation.z
-        //        print("hitTest coord: (",x, y, z, ")") // DEBUG
-        
-        // Rotate the node according to camera (only horizontally)
-        // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
-        //        let yaw = sceneView.session.currentFrame?.camera.eulerAngles.y
-        
-        return SCNVector3(x, y, z)
+        guard let hitTest = sceneView.hitTest(
+            tapLocation,
+            types: .existingPlaneUsingExtent
+        ).first
+        else { return SCNVector3(0,0,0) } //TODO: think about failure return behavior
+        let translation = hitTest.worldTransform.columns.3
+        return SCNVector3(translation.x, translation.y, translation.z)
     }
     
     func getTapGestureRecognizer() -> UITapGestureRecognizer {
@@ -279,7 +286,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     
-    //MARK: - others
+    //MARK: - session handlers
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
     }
@@ -291,4 +298,5 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
     }
+
 }
