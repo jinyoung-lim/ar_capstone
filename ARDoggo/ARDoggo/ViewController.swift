@@ -13,26 +13,28 @@ import ARKit
 class ViewController: UIViewController, ARSCNViewDelegate {
     // MARK: - global variables
     @IBOutlet var sceneView: ARSCNView!
+    @IBOutlet weak var comeHereButton: UIButton!
+    @IBOutlet weak var doneButton: UIButton!
+    
     var wolf_fur: ColladaRig?
     var tapGestureRecognizer: UITapGestureRecognizer?
     var trackerNode: SCNNode!
     var wolfIsPlaced = false
     var planeIsDetected = false
+    let WOLF_SCALE = 0.6
     var wolf: SCNNode!
-    var wolfScale = 0.6
-    var worldPos: SCNVector3!
+    var userPos: SCNVector3!
     var cameraYaw: Float!
     
-    //MARK: - buttons
-    @IBAction func onComeHereButton(_ sender: UIButton) {
-//        let centerPos = getUserPosVec()
-        let deltaX = worldPos.x - wolf.position.x
-        let deltaZ = worldPos.z - wolf.position.z
-        let dist = sqrt(deltaX*deltaX + deltaZ*deltaZ)
-        print("dist between user and wolf", dist)
-        walk(to: worldPos, duration: Double(dist))
-    }
+    //MARK: - game state variables
+    var isSeekMode: Bool!
+    @IBOutlet weak var gameModeLabel: UILabel!
     
+    //MARK: - timer variables
+    @IBOutlet weak var timerLabel: UILabel!
+    let DEFAULT_ROUND_TIME = 100
+    var remainingSeconds: Int!
+    var timer: Timer!
     
     
     // MARK: - ARSCNViewDelegate
@@ -54,6 +56,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Enable lighting
         sceneView.autoenablesDefaultLighting = true
         sceneView.automaticallyUpdatesLighting = true
+        
+        // Start the timer
+        remainingSeconds = DEFAULT_ROUND_TIME
+        runTimer()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -66,6 +72,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Run the view's session
         sceneView.session.run(configuration)
+        
+        // Hide comeHereButton and done button at first
+        comeHereButton.isEnabled = false
+        comeHereButton.isHidden = true
+        doneButton.isEnabled = false
+        doneButton.isHidden = true
+        // Hide mode first and then seek mode
+        isSeekMode = false
+        gameModeLabel.text = "Hide the doggo!"
     }
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -79,17 +94,69 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Return if plane is not detected
         if wolfIsPlaced {
             //do things with wolf
+            guard isSeekMode else { return }
+//            detectTapCollisionWithWolf()
         }
         else {
             guard planeIsDetected else { return }
             trackerNode.removeFromParentNode()
             addModelToSceneView()
+            // Unhide comeHereButton once the wolf is added
+            comeHereButton.isEnabled = true
+            comeHereButton.isHidden = false
+            doneButton.isEnabled = true
+            doneButton.isHidden = false
+            
             wolfIsPlaced = true
         }
     }
     
-    //Mark: - renderers
+    //MARK: - timer related classes
+    //referrence: https://medium.com/libertyit/ar-madness-our-open-source-arkit-game-tutorial-part-five-game-management-64234225289b
+    func runTimer() {
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: (#selector(self.updateTimer)), userInfo: nil, repeats: true)
+    }
     
+    @objc func updateTimer() {
+        if remainingSeconds == 0 {
+            // this state would be reached twice
+            // - once when hide mode is over and
+            // - another time when the seek mode is over
+            if (!isSeekMode) {
+                gameChangeHideToSeek()
+            }
+            else {
+                timer.invalidate() // remove timer from RunLoop
+                gameOver()
+            }
+        }
+        else {
+            remainingSeconds -= 1
+            timerLabel.text = "\(remainingSeconds ?? DEFAULT_ROUND_TIME)"
+        }
+        
+    }
+    
+    func resetTimer(){
+        timer.invalidate()
+        remainingSeconds = DEFAULT_ROUND_TIME
+        timerLabel.text = "\(remainingSeconds ?? DEFAULT_ROUND_TIME)"
+        runTimer()
+    }
+    
+    //MARK: - buttons
+    @IBAction func onComeHereButton(_ sender: UIButton) {
+        //        let centerPos = getUserPosVec()
+        let deltaX = userPos.x - wolf.position.x
+        let deltaZ = userPos.z - wolf.position.z
+        let dist = sqrt(deltaX*deltaX + deltaZ*deltaZ)
+        walk(to: userPos, duration: Double(dist))
+    }
+    @IBAction func onDoneButton(_ sender: Any) {
+        remainingSeconds = 0
+    }
+    
+    //Mark: - renderers
     // Override to create and configure nodes for anchors added to the view's session.
     // Visualize horizontal planes refer: https://www.appcoda.com/arkit-horizontal-plane/
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
@@ -154,7 +221,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             .first
             else { return }
         let transMat = SCNMatrix4(hitTest.worldTransform)
-        worldPos = SCNVector3Make(transMat.m41, transMat.m42, transMat.m43)
+        userPos = SCNVector3Make(transMat.m41, transMat.m42, transMat.m43)
         cameraYaw = sceneView.session.currentFrame?.camera.eulerAngles.y
         
         // Run below only if wolf is not placed
@@ -167,7 +234,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             trackerNode.eulerAngles.x = -.pi/2.0 // make tracker horizontal
             planeIsDetected = true
         }
-        trackerNode.position = worldPos
+        trackerNode.position = userPos
         trackerNode.eulerAngles.y = cameraYaw!
         sceneView.scene.rootNode.addChildNode(trackerNode)
         
@@ -175,18 +242,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     //MARK: - wolf actions
     func walk(to: SCNVector3, duration: Double) {
-        let moveAngle: Float = cameraYaw
-        var startAngle = wolf.eulerAngles.y
-//        if (startAngle > moveAngle) {
-//            startAngle *= -1
+//        print("cameraYaw: ", cameraYaw)
+//        print("wolf euler: ", wolf.eulerAngles)
+        let glkToVec = SCNVector3ToGLKVector3(to)
+        let glkWolfPosVec = SCNVector3ToGLKVector3(wolf.position)
+        let toDir = SCNVector3FromGLKVector3(GLKVector3Subtract(glkToVec, glkWolfPosVec))
+        let startAngle = wolf.eulerAngles.y
+        let moveAngle: Float = cameraYaw - .pi/4.0
+//        if (startAngle < moveAngle) {
+//            moveAngle *= -1
 //        }
         let interAngle = startAngle + moveAngle
         let walkAction = SCNAction.sequence([
             SCNAction.customAction(
                 duration: duration*0.2,
                 action: {(node, elapsedTime) in
-                    let percentage: Float = Float(elapsedTime) / Float(duration*0.2)
-                    node.eulerAngles.y = startAngle + moveAngle * percentage
+//                    let percentage: Float = Float(elapsedTime) / Float(duration*0.2)
+//                    node.eulerAngles.y = startAngle + moveAngle * percentage
+//                    node.eulerAngles.y = moveAngle
+                node.eulerAngles.y = toDir.y
             }),
             SCNAction.move(
                 to: to,
@@ -196,7 +270,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 duration: duration*0.2,
                 action: {(node, elapsedTime) in
                     let percentage: Float = Float(elapsedTime) / Float(duration*0.2)
-                    node.eulerAngles.y = interAngle - startAngle * percentage
+//                    node.eulerAngles.y = interAngle - startAngle * percentage
+                    node.eulerAngles.y = self.cameraYaw
+
             })]
         )
         wolf.runAction(walkAction, forKey: "walk_to")
@@ -229,11 +305,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Rotate the node according to camera (only horizontally)
         // referred: https://stackoverflow.com/questions/46390019/how-to-change-orientation-of-a-scnnode-to-the-camera-with-arkit
         // place right behind where the user tapped
-        wolf.scale = SCNVector3(wolfScale, wolfScale, wolfScale) // scale down the wolf
+        wolf.scale = SCNVector3(WOLF_SCALE, WOLF_SCALE, WOLF_SCALE) // scale down the wolf
         wolf.rotation = SCNVector4(0, 1, 0, cameraYaw)
-        wolf.position = worldPos
+        wolf.position = userPos
         // Place the wolf a bit "behind" where the user taps
-        wolf.localTranslate(by: SCNVector3(0, 0, 0.17*wolfScale))
+        wolf.localTranslate(by: SCNVector3(0, 0, 0.17*WOLF_SCALE))
         // Display wolf with "normal" orientation. After changing wolf.scn's node
         // names, 90 degrees x-rotation happened (by accident?) and this "fixes" it.
         // If model is fixed to have horizontal orientation, could delete this line.
@@ -258,9 +334,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     //MARK: - hit test and tapping
     func getUserPosVec() -> SCNVector3 {
-        print("worldPos: ", worldPos)
+        print("worldPos: ", userPos)
         guard let hitTest = sceneView.hitTest(
-            CGPoint(x: CGFloat(worldPos.x), y: CGFloat(worldPos.z)),
+            CGPoint(x: CGFloat(userPos.x), y: CGFloat(userPos.z)),
             types: [.featurePoint, .existingPlane]
         )
         .first
@@ -269,17 +345,24 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return SCNVector3(translation.x, translation.y, translation.z)
     }
     
-    @objc func getScreenTapPosVec(withGestureRecognizer recognizer: UIGestureRecognizer) -> SCNVector3 {
+    func detectTapCollisionWithWolf(withGestureRecognizer recognizer: UIGestureRecognizer) -> Bool {
         // Use the tap location to determine if on a plane
         let tapLocation = recognizer.location(in: sceneView)
-        guard let hitTest = sceneView.hitTest(
-            tapLocation,
-            types: .existingPlaneUsingExtent
-        ).first
-        else { return SCNVector3(0,0,0) } //TODO: think about failure return behavior
-        let translation = hitTest.worldTransform.columns.3
-        return SCNVector3(translation.x, translation.y, translation.z)
+//        sceneView.hitTest(tapLocation, options: [SCNHitTestOption : Any]?)
+        return false
     }
+    
+//    @objc func getScreenTapPosVec(withGestureRecognizer recognizer: UIGestureRecognizer) -> SCNVector3 {
+//        // Use the tap location to determine if on a plane
+//        let tapLocation = recognizer.location(in: sceneView)
+//        guard let hitTest = sceneView.hitTest(
+//            tapLocation,
+//            types: .existingPlaneUsingExtent
+//        ).first
+//        else { return SCNVector3(0,0,0) } //TODO: think about failure return behavior
+//        let translation = hitTest.worldTransform.columns.3
+//        return SCNVector3(translation.x, translation.y, translation.z)
+//    }
     
     func getTapGestureRecognizer() -> UITapGestureRecognizer {
         return tapGestureRecognizer!
@@ -298,5 +381,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
     }
-
+    
+    //MARK: - game state change and game over
+    func gameChangeHideToSeek() {
+        isSeekMode = true
+        resetTimer()
+        gameModeLabel.text = "Where's my doggo?"
+        
+        // Hide the comeHereButton and doneButton!
+        comeHereButton.isEnabled = false
+        comeHereButton.isHidden = true
+        doneButton.isEnabled = false
+        doneButton.isHidden = true
+    }
+    
+    func gameOver(){
+        //go back to the Home View Controller
+        self.dismiss(animated: true, completion: nil)
+    }
 }

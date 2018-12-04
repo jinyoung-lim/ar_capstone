@@ -16,6 +16,7 @@
 		28B87CF22188B60100E30162 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 28B87CF02188B60100E30162 /* LaunchScreen.storyboard */; };
 		28B87CFD2188B60100E30162 /* ARDoggoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B87CFC2188B60100E30162 /* ARDoggoTests.swift */; };
 		28B87D082188B60100E30162 /* ARDoggoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B87D072188B60100E30162 /* ARDoggoUITests.swift */; };
+		28F6D21821B57CC100B0ADF6 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F6D21721B57CC100B0ADF6 /* HomeViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,7 @@
 		28B87D032188B60100E30162 /* ARDoggoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ARDoggoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		28B87D072188B60100E30162 /* ARDoggoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARDoggoUITests.swift; sourceTree = "<group>"; };
 		28B87D092188B60100E30162 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		28F6D21721B57CC100B0ADF6 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +106,7 @@
 				28B87CE52188B5FE00E30162 /* AppDelegate.swift */,
 				28B87CE72188B5FE00E30162 /* art.scnassets */,
 				28B87CE92188B5FE00E30162 /* ViewController.swift */,
+				28F6D21721B57CC100B0ADF6 /* HomeViewController.swift */,
 				28B87CEB2188B5FE00E30162 /* Main.storyboard */,
 				28B87CEE2188B60100E30162 /* Assets.xcassets */,
 				28B87CF02188B60100E30162 /* LaunchScreen.storyboard */,
@@ -266,6 +269,7 @@
 				28B87CEA2188B5FE00E30162 /* ViewController.swift in Sources */,
 				28B87CE62188B5FE00E30162 /* AppDelegate.swift in Sources */,
 				286F796B219DDDE70059658D /* ColladaRig.swift in Sources */,
+				28F6D21821B57CC100B0ADF6 /* HomeViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

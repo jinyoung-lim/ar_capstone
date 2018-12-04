@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BV1-FR-VrT">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Pff-zd-udc">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -10,10 +10,63 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--HomeViewController-->
+        <scene sceneID="Y0Y-RX-FbG">
+            <objects>
+                <viewController title="HomeViewController" id="Pff-zd-udc" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="0f8-ic-Emo">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8In-gE-q0b" userLabel="startGameButton" colorLabel="IBBuiltInLabel-Blue">
+                                <rect key="frame" x="37" y="493" width="300" height="50"/>
+                                <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="h9B-MJ-SXf"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="Menlo-BoldItalic" family="Menlo" pointSize="20"/>
+                                <state key="normal" title="start">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <segue destination="BV1-FR-VrT" kind="presentation" identifier="homeToGameSegue" id="4R2-4h-G7J"/>
+                                </connections>
+                            </button>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="corgiTracker" translatesAutoresizingMaskIntoConstraints="NO" id="9zN-Ic-jKc">
+                                <rect key="frame" x="37" y="233" width="300" height="200"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="WHERE IS MY DOGGO" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QRh-Fh-ere" userLabel="titleLable">
+                                <rect key="frame" x="37" y="114" width="300" height="50"/>
+                                <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" name="Menlo-BoldItalic" family="Menlo" pointSize="22"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="8In-gE-q0b" firstAttribute="centerX" secondItem="0f8-ic-Emo" secondAttribute="centerX" id="CVq-re-oBv"/>
+                            <constraint firstItem="QRh-Fh-ere" firstAttribute="width" secondItem="0f8-ic-Emo" secondAttribute="height" multiplier="300:667" id="D2A-U7-0cp"/>
+                            <constraint firstItem="8In-gE-q0b" firstAttribute="trailing" secondItem="9zN-Ic-jKc" secondAttribute="trailing" id="Kbw-8F-TKQ"/>
+                            <constraint firstItem="9zN-Ic-jKc" firstAttribute="top" secondItem="QRh-Fh-ere" secondAttribute="bottom" constant="70" id="Utc-SX-ajj"/>
+                            <constraint firstItem="8In-gE-q0b" firstAttribute="leading" secondItem="9zN-Ic-jKc" secondAttribute="leading" id="dft-jR-mgr"/>
+                            <constraint firstItem="QRh-Fh-ere" firstAttribute="height" secondItem="8In-gE-q0b" secondAttribute="height" id="gIX-3v-T2x"/>
+                            <constraint firstItem="8In-gE-q0b" firstAttribute="leading" secondItem="QRh-Fh-ere" secondAttribute="leading" id="q8X-jm-vGp"/>
+                            <constraint firstItem="8In-gE-q0b" firstAttribute="trailing" secondItem="QRh-Fh-ere" secondAttribute="trailing" id="rKp-a1-l2N"/>
+                            <constraint firstItem="8In-gE-q0b" firstAttribute="top" secondItem="9zN-Ic-jKc" secondAttribute="bottom" constant="70" id="sMB-zt-YCT"/>
+                            <constraint firstItem="9zN-Ic-jKc" firstAttribute="centerY" secondItem="K9r-5G-BDx" secondAttribute="centerY" id="sfJ-pG-ter"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="K9r-5G-BDx"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="gaI-nb-5xY" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-716" y="47.226386806596707"/>
+        </scene>
+        <!--ViewController-->
         <scene sceneID="tXr-a1-R10">
             <objects>
-                <viewController id="BV1-FR-VrT" customClass="ViewController" customModule="ARDoggo" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="ViewController" id="BV1-FR-VrT" customClass="ViewController" customModule="ARDoggo" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="U0K-SW-4ec">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -22,8 +75,8 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                             </arscnView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageSizeForAccessibilityContentSizeCategory="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="i0b-pY-AP5" userLabel="comeHereButton" colorLabel="IBBuiltInLabel-Blue">
-                                <rect key="frame" x="157" y="587" width="60" height="60"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <rect key="frame" x="118" y="587" width="60" height="60"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="tintColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <state key="normal" image="comeHere"/>
@@ -31,6 +84,40 @@
                                     <action selector="onComeHereButton:" destination="BV1-FR-VrT" eventType="touchUpInside" id="Tlv-8a-8m0"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageSizeForAccessibilityContentSizeCategory="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Mev-Ud-9IP" userLabel="doneButton" colorLabel="IBBuiltInLabel-Blue">
+                                <rect key="frame" x="196" y="587" width="60" height="60"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="tintColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <state key="normal" image="thumbs_up"/>
+                                <connections>
+                                    <action selector="onDoneButton:" destination="BV1-FR-VrT" eventType="touchUpInside" id="3Gc-7t-1NN"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" text="Timer" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="60" translatesAutoresizingMaskIntoConstraints="NO" id="nin-kY-vHT" userLabel="timerTextLabel">
+                                <rect key="frame" x="16" y="20" width="60" height="20"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES"/>
+                                <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="12"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="60" translatesAutoresizingMaskIntoConstraints="NO" id="h3i-ED-NFb" userLabel="timerLabel">
+                                <rect key="frame" x="16" y="40" width="60" height="41"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES"/>
+                                <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" name="Menlo-Bold" family="Menlo" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" text="Hide the doggo!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="284" translatesAutoresizingMaskIntoConstraints="NO" id="58v-M5-foG" userLabel="gameModeLabel" colorLabel="IBBuiltInLabel-Blue">
+                                <rect key="frame" x="75" y="20" width="284" height="61"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES"/>
+                                <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" name="Menlo-BoldItalic" family="Menlo" pointSize="26"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
@@ -42,15 +129,21 @@
                         <viewLayoutGuide key="safeArea" id="fQZ-KI-GVf"/>
                     </view>
                     <connections>
+                        <outlet property="comeHereButton" destination="i0b-pY-AP5" id="Umu-EP-8iy"/>
+                        <outlet property="doneButton" destination="Mev-Ud-9IP" id="obe-Qw-zr8"/>
+                        <outlet property="gameModeLabel" destination="58v-M5-foG" id="nV2-Ls-A8T"/>
                         <outlet property="sceneView" destination="BrB-h1-WRS" id="5nT-qQ-ynl"/>
+                        <outlet property="timerLabel" destination="h3i-ED-NFb" id="Oem-mk-9qx"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="56.799999999999997" y="70.614692653673174"/>
+            <point key="canvasLocation" x="101.59999999999999" y="46.326836581709152"/>
         </scene>
     </scenes>
     <resources>
         <image name="comeHere" width="200" height="200"/>
+        <image name="corgiTracker" width="410" height="410"/>
+        <image name="thumbs_up" width="200" height="200"/>
     </resources>
 </document>
