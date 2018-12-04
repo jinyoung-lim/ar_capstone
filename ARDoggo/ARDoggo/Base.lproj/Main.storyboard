@@ -34,6 +34,9 @@
                             </button>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="corgiTracker" translatesAutoresizingMaskIntoConstraints="NO" id="9zN-Ic-jKc">
                                 <rect key="frame" x="37" y="233" width="300" height="200"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="9zN-Ic-jKc" secondAttribute="height" multiplier="1:1" id="UYX-Uz-6Jn"/>
+                                </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="WHERE IS MY DOGGO" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QRh-Fh-ere" userLabel="titleLable">
                                 <rect key="frame" x="37" y="114" width="300" height="50"/>
@@ -89,7 +92,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="tintColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <state key="normal" image="thumbs_up"/>
+                                <state key="normal" image="thumbsUp"/>
                                 <connections>
                                     <action selector="onDoneButton:" destination="BV1-FR-VrT" eventType="touchUpInside" id="3Gc-7t-1NN"/>
                                 </connections>
@@ -144,6 +147,6 @@
     <resources>
         <image name="comeHere" width="200" height="200"/>
         <image name="corgiTracker" width="410" height="410"/>
-        <image name="thumbs_up" width="200" height="200"/>
+        <image name="thumbsUp" width="200" height="200"/>
     </resources>
 </document>

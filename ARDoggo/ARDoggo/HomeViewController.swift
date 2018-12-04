@@ -16,10 +16,6 @@ class HomeViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
     
-//    @IBAction func onStartGameButton(_ sender: Any) {
-//        print("in onStartGameButton")
-//        performSegue(withIdentifier: "homeToGameSegue", sender: self)
-//    }
     
     /*
     // MARK: - Navigation

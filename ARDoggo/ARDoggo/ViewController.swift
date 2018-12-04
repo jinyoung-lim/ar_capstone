@@ -3,7 +3,7 @@
 //  ARDoggo
 //
 //  Created by LimJJ on 10/30/18.
-//  Copyright © 2018 JJ Lim. All rights reserved.
+//  Copyright © 2018 (Jinyoung) JJ Lim. All rights reserved.
 //
 
 import UIKit
@@ -17,7 +17,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet weak var doneButton: UIButton!
     
     var wolf_fur: ColladaRig?
-    var tapGestureRecognizer: UITapGestureRecognizer?
+//    var tapGestureRecognizer: UITapGestureRecognizer = gesture
     var trackerNode: SCNNode!
     var wolfIsPlaced = false
     var planeIsDetected = false
@@ -95,7 +95,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         if wolfIsPlaced {
             //do things with wolf
             guard isSeekMode else { return }
-//            detectTapCollisionWithWolf()
+            let isDetected = detectTapCollisionWithWolf(touches: touches)
         }
         else {
             guard planeIsDetected else { return }
@@ -345,12 +345,21 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return SCNVector3(translation.x, translation.y, translation.z)
     }
     
-    func detectTapCollisionWithWolf(withGestureRecognizer recognizer: UIGestureRecognizer) -> Bool {
+    func detectTapCollisionWithWolf(touches :Set<UITouch>) -> Bool {
         // Use the tap location to determine if on a plane
-        let tapLocation = recognizer.location(in: sceneView)
-//        sceneView.hitTest(tapLocation, options: [SCNHitTestOption : Any]?)
+        guard let firstTouch = touches.first else { return false }
+        let touchLocation = firstTouch.location(in: view)
+        guard let hitTestResult = sceneView.hitTest(
+            touchLocation,
+            options: [SCNHitTestOption.ignoreHiddenNodes: true]
+        ).first
+        else { return false }
+        if (hitTestResult.node==wolf.childNode(withName: "body", recursively: false)) {
+            return true
+        }
         return false
     }
+    
     
 //    @objc func getScreenTapPosVec(withGestureRecognizer recognizer: UIGestureRecognizer) -> SCNVector3 {
 //        // Use the tap location to determine if on a plane
@@ -364,9 +373,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 //        return SCNVector3(translation.x, translation.y, translation.z)
 //    }
     
-    func getTapGestureRecognizer() -> UITapGestureRecognizer {
-        return tapGestureRecognizer!
-    }
+//    func getTapGestureRecognizer() -> UITapGestureRecognizer {
+//        return tapGestureRecognizer!
+//    }
     
     
     //MARK: - session handlers
@@ -400,3 +409,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.dismiss(animated: true, completion: nil)
     }
 }
+
+// app icon: Dog by Ivan Garbev from the Noun Project
+//
