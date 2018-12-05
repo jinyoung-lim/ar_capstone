@@ -46,8 +46,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Set the debuging options
         sceneView.debugOptions = [
-            ARSCNDebugOptions.showFeaturePoints,
-            ARSCNDebugOptions.showWorldOrigin
+            ARSCNDebugOptions.showFeaturePoints
         ]
         
         // Show statistics such as fps and timing information
@@ -95,7 +94,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         if wolfIsPlaced {
             //do things with wolf
             guard isSeekMode else { return }
-            let isDetected = detectTapCollisionWithWolf(touches: touches)
+            let foundWolf = detectTapCollisionWithWolf(touches: touches)
+            if (foundWolf) {
+                print("putWin")
+                putWinOrLooseText(didWin: true)
+            }
+//            seekGameOver()
         }
         else {
             guard planeIsDetected else { return }
@@ -127,7 +131,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
             else {
                 timer.invalidate() // remove timer from RunLoop
-                gameOver()
+                seekGameOver()
             }
         }
         else {
@@ -242,6 +246,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     //MARK: - wolf actions
     func walk(to: SCNVector3, duration: Double) {
+        //TODO: fix walk rotations (low priority)
 //        print("cameraYaw: ", cameraYaw)
 //        print("wolf euler: ", wolf.eulerAngles)
         let glkToVec = SCNVector3ToGLKVector3(to)
@@ -252,7 +257,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 //        if (startAngle < moveAngle) {
 //            moveAngle *= -1
 //        }
-        let interAngle = startAngle + moveAngle
+//        let interAngle = startAngle + moveAngle
         let walkAction = SCNAction.sequence([
             SCNAction.customAction(
                 duration: duration*0.2,
@@ -269,7 +274,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             SCNAction.customAction(
                 duration: duration*0.2,
                 action: {(node, elapsedTime) in
-                    let percentage: Float = Float(elapsedTime) / Float(duration*0.2)
+//                    let percentage: Float = Float(elapsedTime) / Float(duration*0.2)
 //                    node.eulerAngles.y = interAngle - startAngle * percentage
                     node.eulerAngles.y = self.cameraYaw
 
@@ -360,24 +365,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return false
     }
     
-    
-//    @objc func getScreenTapPosVec(withGestureRecognizer recognizer: UIGestureRecognizer) -> SCNVector3 {
-//        // Use the tap location to determine if on a plane
-//        let tapLocation = recognizer.location(in: sceneView)
-//        guard let hitTest = sceneView.hitTest(
-//            tapLocation,
-//            types: .existingPlaneUsingExtent
-//        ).first
-//        else { return SCNVector3(0,0,0) } //TODO: think about failure return behavior
-//        let translation = hitTest.worldTransform.columns.3
-//        return SCNVector3(translation.x, translation.y, translation.z)
-//    }
-    
-//    func getTapGestureRecognizer() -> UITapGestureRecognizer {
-//        return tapGestureRecognizer!
-//    }
-    
-    
     //MARK: - session handlers
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
@@ -404,9 +391,27 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         doneButton.isHidden = true
     }
     
-    func gameOver(){
+    func hideGameOver() {
+        
+    }
+    func seekGameOver() {
         //go back to the Home View Controller
         self.dismiss(animated: true, completion: nil)
+    }
+    func putWinOrLooseText(didWin: Bool) {
+        //Referred: https://www.youtube.com/watch?v=MzEevVPWijM
+        let text = SCNText(string: "YAY!!", extrusionDepth: 1.5)
+        let textMat = SCNMaterial()
+        textMat.diffuse.contents = UIColor.red
+        text.materials = [textMat]
+        let textNode = SCNNode()
+        textNode.geometry = text
+        
+        textNode.position = SCNVector3(0,0,-1)
+        textNode.scale = SCNVector3(5, 5, 5)
+        textNode.isHidden = false
+        print(textNode)
+        sceneView.scene.rootNode.addChildNode(textNode)
     }
 }
 
