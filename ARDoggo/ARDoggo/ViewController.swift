@@ -20,7 +20,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 //    var tapGestureRecognizer: UITapGestureRecognizer = gesture
     var trackerNode: SCNNode!
     var wolfIsPlaced = false
-    var planeIsDetected = false
+    var planeIsDetected: Bool!
     let WOLF_SCALE = 0.6
     var wolf: SCNNode!
     var userPos: SCNVector3!
@@ -29,6 +29,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     //MARK: - game state variables
     var isSeekMode: Bool!
     @IBOutlet weak var gameModeLabel: UILabel!
+    var wolfIsFound: Bool!
     
     //MARK: - timer variables
     @IBOutlet weak var timerLabel: UILabel!
@@ -56,9 +57,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.autoenablesDefaultLighting = true
         sceneView.automaticallyUpdatesLighting = true
         
-        // Start the timer
-        remainingSeconds = DEFAULT_ROUND_TIME
-        runTimer()
+//        // Start the timer
+//        remainingSeconds = DEFAULT_ROUND_TIME
+//        runTimer()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -77,9 +78,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         comeHereButton.isHidden = true
         doneButton.isEnabled = false
         doneButton.isHidden = true
-        // Hide mode first and then seek mode
+//        // Hide mode first and then seek mode
         isSeekMode = false
         gameModeLabel.text = "Hide the doggo!"
+//        wolfIsFound = false
+        
+        // Present enter hide mode alert
+        enterHideModeAlert()
+        
+//        // Start the timer
+//        remainingSeconds = DEFAULT_ROUND_TIME
+//        runTimer()
     }
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -94,8 +103,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         if wolfIsPlaced {
             //do things with wolf
             guard isSeekMode else { return }
-            let foundWolf = detectTapCollisionWithWolf(touches: touches)
-            if (foundWolf) {
+            wolfIsFound = detectTapCollisionWithWolf(touches: touches)
+            if (wolfIsFound) {
                 print("putWin")
                 putWinOrLooseText(didWin: true)
             }
@@ -127,7 +136,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             // - once when hide mode is over and
             // - another time when the seek mode is over
             if (!isSeekMode) {
-                gameChangeHideToSeek()
+                hideGameOver()
             }
             else {
                 timer.invalidate() // remove timer from RunLoop
@@ -379,7 +388,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     //MARK: - game state change and game over
-    func gameChangeHideToSeek() {
+    func startHideGame() {
+        // Hide mode first and then seek mode
+        planeIsDetected = false
+        wolfIsFound = false
+        // Start the timer
+        remainingSeconds = DEFAULT_ROUND_TIME
+        runTimer()
+    }
+    
+    func hideGameOver() {
+        enterSeekModeAlert()
         isSeekMode = true
         resetTimer()
         gameModeLabel.text = "Where's my doggo?"
@@ -391,14 +410,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         doneButton.isHidden = true
     }
     
-    func hideGameOver() {
-        
-    }
     func seekGameOver() {
         //go back to the Home View Controller
+        if (wolfIsFound) {
+            
+        }
+        else {
+            
+        }
         self.dismiss(animated: true, completion: nil)
     }
     func putWinOrLooseText(didWin: Bool) {
+        //TODO: Wes
         //Referred: https://www.youtube.com/watch?v=MzEevVPWijM
         let text = SCNText(string: "YAY!!", extrusionDepth: 1.5)
         let textMat = SCNMaterial()
@@ -413,7 +436,69 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         print(textNode)
         sceneView.scene.rootNode.addChildNode(textNode)
     }
+    
+    //MARK: - alerts
+    func enterHideModeAlert() {
+        let alert = UIAlertController(
+            title: "Ready to Hide Doggo?",
+            message: "Doggo ate all the treats that were hidden in the cabinet. Human is coming back in \(DEFAULT_ROUND_TIME)seconds. Are you ready to help Doggo hide from big troubles?",
+            preferredStyle: UIAlertController.Style.alert
+        )
+        alert.addAction(
+            UIAlertAction(
+                title: "Yes!",
+                style: UIAlertAction.Style.default,
+                handler: { (action) in
+                    alert.dismiss(animated: true, completion: nil)
+                    self.startHideGame()
+                }
+            )
+        )
+        self.present(alert, animated: true, completion: nil)
+//        // Start the timer
+//        remainingSeconds = DEFAULT_ROUND_TIME
+//        runTimer()
+    }
+    
+    func enterSeekModeAlert() {
+        let alert = UIAlertController(
+            title: "Ready to find Doggo?",
+            message: "Doggo ate all the treats that you hid in the cabinet and now hiding somewhere. You have \(DEFAULT_ROUND_TIME)seconds to find and educate Doggo. Are you ready to find Doggo?",
+            preferredStyle: UIAlertController.Style.alert
+        )
+        alert.addAction(
+            UIAlertAction(
+                title: "Yes!",
+                style: UIAlertAction.Style.default,
+                handler: { (action) in
+                    alert.dismiss(animated: true, completion: nil)
+                }
+            )
+        )
+        self.present(alert, animated: true, completion: nil)
+        print("after present")
+        // Start the timer
+        remainingSeconds = DEFAULT_ROUND_TIME
+        runTimer()
+    }
+    
+    func gameWinAlert() {
+        let alert = UIAlertController(
+            title: "YAY",
+            message: "You found the Doggo :)",
+            preferredStyle: UIAlertController.Style.alert
+        )
+        alert.addAction(
+            UIAlertAction(
+                title: "Back To Home",
+                style: UIAlertAction.Style.default,
+                handler: { (action) in alert.dismiss(animated: true, completion: nil) }
+                //TODO: back to home action
+            )
+        )
+        self.present(alert, animated: true, completion: nil)
+    }
+    func gameLooseAlert() {
+        
+    }
 }
-
-// app icon: Dog by Ivan Garbev from the Noun Project
-//
