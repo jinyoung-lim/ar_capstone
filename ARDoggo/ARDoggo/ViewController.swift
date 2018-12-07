@@ -413,10 +413,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func seekGameOver() {
         //go back to the Home View Controller
         if (wolfIsFound) {
-            
+            gameWinAlert()
         }
         else {
-            
+            gameLoseAlert()
         }
         self.dismiss(animated: true, completion: nil)
     }
@@ -476,7 +476,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             )
         )
         self.present(alert, animated: true, completion: nil)
-        print("after present")
         // Start the timer
         remainingSeconds = DEFAULT_ROUND_TIME
         runTimer()
@@ -492,13 +491,30 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             UIAlertAction(
                 title: "Back To Home",
                 style: UIAlertAction.Style.default,
-                handler: { (action) in alert.dismiss(animated: true, completion: nil) }
-                //TODO: back to home action
+                handler: { (action)
+                    in alert.dismiss(animated: true, completion: nil)
+                    self.performSegue(withIdentifier: "unwindToHomeViewSegue", sender: self)
+                }
             )
         )
         self.present(alert, animated: true, completion: nil)
     }
-    func gameLooseAlert() {
-        
+    func gameLoseAlert() {
+        let alert = UIAlertController(
+            title: "BOO",
+            message: "You let the Doggo loose :(",
+            preferredStyle: UIAlertController.Style.alert
+        )
+        alert.addAction(
+            UIAlertAction(
+                title: "Back To Home",
+                style: UIAlertAction.Style.default,
+                handler: { (action)
+                    in alert.dismiss(animated: true, completion: nil)
+                    self.performSegue(withIdentifier: "unwindToHomeViewSegue", sender: self)
+            }
+            )
+        )
+        self.present(alert, animated: true, completion: nil)
     }
 }

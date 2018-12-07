@@ -137,9 +137,11 @@
                         <outlet property="gameModeLabel" destination="58v-M5-foG" id="nV2-Ls-A8T"/>
                         <outlet property="sceneView" destination="BrB-h1-WRS" id="5nT-qQ-ynl"/>
                         <outlet property="timerLabel" destination="h3i-ED-NFb" id="Oem-mk-9qx"/>
+                        <segue destination="o8Z-GZ-ZRi" kind="unwind" identifier="unwindToHomeViewSegue" unwindAction="unwindToHomeViewWithSegue:" id="ve8-4n-ZzN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
+                <exit id="o8Z-GZ-ZRi" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="101.59999999999999" y="46.326836581709152"/>
         </scene>
