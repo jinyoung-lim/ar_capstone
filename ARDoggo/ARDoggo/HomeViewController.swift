@@ -16,7 +16,7 @@ class HomeViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
     
-    @IBAction func unwindToHomeView(segue:UIStoryboardSegue) {
+    @IBAction func unwindToHomeViewSegue(segue:UIStoryboardSegue) {
         
     }
 

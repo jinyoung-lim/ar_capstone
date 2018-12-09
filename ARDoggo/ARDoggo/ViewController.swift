@@ -21,7 +21,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var trackerNode: SCNNode!
     var wolfIsPlaced = false
     var planeIsDetected: Bool!
-    let WOLF_SCALE = 0.6
+    let WOLF_SCALE = 0.5
     var wolf: SCNNode!
     var userPos: SCNVector3!
     var cameraYaw: Float!
@@ -33,7 +33,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     //MARK: - timer variables
     @IBOutlet weak var timerLabel: UILabel!
-    let DEFAULT_ROUND_TIME = 100
+    let DEFAULT_ROUND_TIME = 20
     var remainingSeconds: Int!
     var timer: Timer!
     
@@ -104,11 +104,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             //do things with wolf
             guard isSeekMode else { return }
             wolfIsFound = detectTapCollisionWithWolf(touches: touches)
+            print("wolfIsFound: ", wolfIsFound)
             if (wolfIsFound) {
                 print("putWin")
-                putWinOrLooseText(didWin: true)
+                gameWinAlert()
             }
-//            seekGameOver()
         }
         else {
             guard planeIsDetected else { return }
@@ -139,8 +139,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 hideGameOver()
             }
             else {
-                timer.invalidate() // remove timer from RunLoop
+                print("update timer 0 -> seekgame over")
                 seekGameOver()
+                timer.invalidate() // remove timer from RunLoop
             }
         }
         else {
@@ -400,7 +401,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func hideGameOver() {
         enterSeekModeAlert()
         isSeekMode = true
-        resetTimer()
+//        resetTimer()
         gameModeLabel.text = "Where's my doggo?"
         
         // Hide the comeHereButton and doneButton!
@@ -418,7 +419,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         else {
             gameLoseAlert()
         }
-        self.dismiss(animated: true, completion: nil)
+//        self.dismiss(animated: true, completion: nil)
     }
     func putWinOrLooseText(didWin: Bool) {
         //TODO: Wes
@@ -441,7 +442,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func enterHideModeAlert() {
         let alert = UIAlertController(
             title: "Ready to Hide Doggo?",
-            message: "Doggo ate all the treats that were hidden in the cabinet. Human is coming back in \(DEFAULT_ROUND_TIME)seconds. Are you ready to help Doggo hide from big troubles?",
+            message: "Doggo ate all the treats that were hidden in the cabinet. Human is coming back in \(DEFAULT_ROUND_TIME)s. Are you ready to help Doggo hide from big troubles?",
             preferredStyle: UIAlertController.Style.alert
         )
         alert.addAction(
@@ -463,7 +464,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func enterSeekModeAlert() {
         let alert = UIAlertController(
             title: "Ready to find Doggo?",
-            message: "Doggo ate all the treats that you hid in the cabinet and now hiding somewhere. You have \(DEFAULT_ROUND_TIME)seconds to find and educate Doggo. Are you ready to find Doggo?",
+            message: "Doggo ate all the treats that you hid in the cabinet and now hiding somewhere. You have \(DEFAULT_ROUND_TIME)s to find and educate Doggo. Are you ready to find Doggo?",
             preferredStyle: UIAlertController.Style.alert
         )
         alert.addAction(
@@ -472,16 +473,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 style: UIAlertAction.Style.default,
                 handler: { (action) in
                     alert.dismiss(animated: true, completion: nil)
+                    self.resetTimer()
                 }
             )
         )
         self.present(alert, animated: true, completion: nil)
         // Start the timer
-        remainingSeconds = DEFAULT_ROUND_TIME
-        runTimer()
+//        remainingSeconds = DEFAULT_ROUND_TIME
+//        runTimer()
     }
     
     func gameWinAlert() {
+        remainingSeconds = 0
         let alert = UIAlertController(
             title: "YAY",
             message: "You found the Doggo :)",
@@ -493,13 +496,16 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 style: UIAlertAction.Style.default,
                 handler: { (action)
                     in alert.dismiss(animated: true, completion: nil)
-                    self.performSegue(withIdentifier: "unwindToHomeViewSegue", sender: self)
+//                    self.performSegue(withIdentifier: "unwindToHomeViewSegue", sender: self)
+                    self.dismiss(animated: true, completion: nil)
+                    
                 }
             )
         )
         self.present(alert, animated: true, completion: nil)
     }
     func gameLoseAlert() {
+        remainingSeconds = 0
         let alert = UIAlertController(
             title: "BOO",
             message: "You let the Doggo loose :(",
@@ -511,9 +517,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 style: UIAlertAction.Style.default,
                 handler: { (action)
                     in alert.dismiss(animated: true, completion: nil)
-                    self.performSegue(withIdentifier: "unwindToHomeViewSegue", sender: self)
-            }
-            )
+//                    self.performSegue(withIdentifier: "unwindToHomeViewSegue", sender: self)
+                    self.dismiss(animated: true, completion: nil)
+            })
         )
         self.present(alert, animated: true, completion: nil)
     }
