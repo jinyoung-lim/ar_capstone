@@ -33,7 +33,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     //MARK: - timer variables
     @IBOutlet weak var timerLabel: UILabel!
-    let DEFAULT_ROUND_TIME = 20
+    let DEFAULT_ROUND_TIME = 100
     var remainingSeconds: Int!
     var timer: Timer!
     
