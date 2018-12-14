@@ -87,6 +87,9 @@ Where Is My Doggo is a 2-person game because implementing an algorithm to hide D
 ### Tracker Node
 When Hide Mode starts, tracker node appears to show User where Doggo will be placed. With tracker node, new users would want to tap the tracker node intuitively and start the game.
 
+### Come Here Button
+Come Here Button is used to make Doggo come in front of User. We implemented `walk(:to)` to move Doggo with animations. At this moment, we do not have working animations for walking. Also, rotating Doggo to face the point where it will head to is not working yet. We did not prioritize this since User only sees when Doggo arrives, not when it leaves most of the time.
+
 ## Issues
 * The heading/rotation when `walk(:to)` is not realistic -> Make Doggo look to the point where it is going 
 * Only one animation plays. Implement walk and sit animations for more realistic Doggo with animation/rigging
