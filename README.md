@@ -76,10 +76,10 @@ If time runs out before you find Doggo AND TAP it, you loose the game!
   Lose game if time runs out before you find and tap Doggo
 <p align="center">
 
-
 ## Architecture
 
 ## Issues
-### Will Fix
+* The heading/rotation when `walk(:to)` begins is not realistic. Make Doggo look to the point where 
+* More realistic Doggo with animation/rigging
+* Occlusion does not work (cannot play 1-person)
 
-## Won't Fix
