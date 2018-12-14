@@ -49,7 +49,7 @@ Once you place Doggo, use the left button ("Come Here button") to hide Doggo. Co
   Use Come Here Button to hide Doggo
 <p align="center">
 
-If you finish hiding Doggo before the time runs out, press the right button (Done Button) to end the hide mode. Then, give your phone to your friend!
+If you finish hiding Doggo before the time runs out, press the right button (Done Button) to end Hide Mode. Then, give your phone to your friend!
 
 ### Seek
 
@@ -62,7 +62,7 @@ You come home to find out that Doggo ate all the treats that you hid in the cabi
   Press "Yes!" to start finding Doggo
 <p align="center">
 
-Once you get into the seek mode, you will have the same amount of time to find Doggo. The default time is 100 seconds. If you find Doggo, tap on it to win the game!
+Once you get into Seek Mode, you will have the same amount of time to find Doggo. The default time is 100 seconds. If you find Doggo, tap on it to win the game!
 
 <p align="center">
   <img src="https://github.com/jlim2/ar_capstone/blob/master/ARDoggo/ARDoggo/HowToPlayGifs/6_found_doggo.gif" width="200"/>
@@ -80,11 +80,15 @@ If time runs out before you find Doggo AND TAP it, you loose the game!
   Lose game if time runs out before you find and tap Doggo
 <p align="center">
 
-## Architecture
+## Implementation Details
+### 2-person Game
+Where Is My Doggo is a 2-person game because implementing an algorithm to hide Doggo was challenging with the limited occlusion that ARKit provides. So we decided to make one person hide Doggo and one person seek Doggo.
 
+### Tracker Node
+When Hide Mode starts, tracker node appears to show User where Doggo will be placed. With tracker node, new users would want to tap the tracker node intuitively and start the game.
 
 ## Issues
 * The heading/rotation when `walk(:to)` is not realistic -> Make Doggo look to the point where it is going 
 * Only one animation plays. Implement walk and sit animations for more realistic Doggo with animation/rigging
 * Occlusion does not work (cannot play 1-person)
-
+* Feature point detection does not work well in dark
