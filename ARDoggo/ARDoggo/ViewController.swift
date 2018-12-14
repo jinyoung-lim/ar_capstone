@@ -17,7 +17,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet weak var doneButton: UIButton!
     
     var wolf_fur: ColladaRig?
-//    var tapGestureRecognizer: UITapGestureRecognizer = gesture
     var trackerNode: SCNNode!
     var wolfIsPlaced = false
     var planeIsDetected: Bool!
@@ -56,10 +55,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Enable lighting
         sceneView.autoenablesDefaultLighting = true
         sceneView.automaticallyUpdatesLighting = true
-        
-//        // Start the timer
-//        remainingSeconds = DEFAULT_ROUND_TIME
-//        runTimer()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -257,24 +252,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     //MARK: - wolf actions
     func walk(to: SCNVector3, duration: Double) {
         //TODO: fix walk rotations (low priority)
-//        print("cameraYaw: ", cameraYaw)
-//        print("wolf euler: ", wolf.eulerAngles)
         let glkToVec = SCNVector3ToGLKVector3(to)
         let glkWolfPosVec = SCNVector3ToGLKVector3(wolf.position)
         let toDir = SCNVector3FromGLKVector3(GLKVector3Subtract(glkToVec, glkWolfPosVec))
         let startAngle = wolf.eulerAngles.y
         let moveAngle: Float = cameraYaw - .pi/4.0
-//        if (startAngle < moveAngle) {
-//            moveAngle *= -1
-//        }
-//        let interAngle = startAngle + moveAngle
         let walkAction = SCNAction.sequence([
             SCNAction.customAction(
                 duration: duration*0.2,
                 action: {(node, elapsedTime) in
-//                    let percentage: Float = Float(elapsedTime) / Float(duration*0.2)
-//                    node.eulerAngles.y = startAngle + moveAngle * percentage
-//                    node.eulerAngles.y = moveAngle
                 node.eulerAngles.y = toDir.y
             }),
             SCNAction.move(
@@ -284,8 +270,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             SCNAction.customAction(
                 duration: duration*0.2,
                 action: {(node, elapsedTime) in
-//                    let percentage: Float = Float(elapsedTime) / Float(duration*0.2)
-//                    node.eulerAngles.y = interAngle - startAngle * percentage
                     node.eulerAngles.y = self.cameraYaw
 
             })]
@@ -419,10 +403,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         else {
             gameLoseAlert()
         }
-//        self.dismiss(animated: true, completion: nil)
     }
+    
     func putWinOrLooseText(didWin: Bool) {
-        //TODO: Wes
+        //TODO: Fix this
         //Referred: https://www.youtube.com/watch?v=MzEevVPWijM
         let text = SCNText(string: "YAY!!", extrusionDepth: 1.5)
         let textMat = SCNMaterial()
@@ -456,9 +440,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             )
         )
         self.present(alert, animated: true, completion: nil)
-//        // Start the timer
-//        remainingSeconds = DEFAULT_ROUND_TIME
-//        runTimer()
     }
     
     func enterSeekModeAlert() {
@@ -478,9 +459,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             )
         )
         self.present(alert, animated: true, completion: nil)
-        // Start the timer
-//        remainingSeconds = DEFAULT_ROUND_TIME
-//        runTimer()
     }
     
     func gameWinAlert() {
@@ -496,7 +474,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 style: UIAlertAction.Style.default,
                 handler: { (action)
                     in alert.dismiss(animated: true, completion: nil)
-//                    self.performSegue(withIdentifier: "unwindToHomeViewSegue", sender: self)
                     self.dismiss(animated: true, completion: nil)
                     
                 }
@@ -517,7 +494,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 style: UIAlertAction.Style.default,
                 handler: { (action)
                     in alert.dismiss(animated: true, completion: nil)
-//                    self.performSegue(withIdentifier: "unwindToHomeViewSegue", sender: self)
                     self.dismiss(animated: true, completion: nil)
             })
         )
