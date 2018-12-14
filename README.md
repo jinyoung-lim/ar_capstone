@@ -2,14 +2,18 @@
 
 # Where Is My Doggo     
 
-This is an iOS app that two players to play hide and seek with an AR dog interactively. It is a final project for COMP465: Interactive Computer Graphics at Macalester College.
+This is an iOS app that two players to play hide and seek with an AR dog interactively. It is a final project for COMP465: Interactive Computer Graphics at Macalester College. Please direct (Jinyoung) JJ Lim (jj.lim418@gmail.com) for any questions.
+
+## Built With
+* ARKit: Apple's framework for augmented reality apps and games
+* SceneKit: Apple's interface for 3D graphics application programming
+* Swift: Apple's programming language
 
 ## Instllation
 Please fork this repository and use XCode to build. The app requires iOS 11.4 or later and uses ARKit, SceneKit, and Swift.
 Swift version is unspecified but you might need XCode 10.1 or later.
 
 Doggo ate all the treats that your friend hid in the cabinet! Your friend is coming back soon. You do not want Doggo to get yelled at because you LOVE Doggo! You have no choice but to hide Doggo before your friend comes back!
-
 
 ## Premise & How to Play
 Doggo ate all the treats that your friend hid in the cabinet!
@@ -78,8 +82,9 @@ If time runs out before you find Doggo AND TAP it, you loose the game!
 
 ## Architecture
 
+
 ## Issues
-* The heading/rotation when `walk(:to)` begins is not realistic. Make Doggo look to the point where 
-* More realistic Doggo with animation/rigging
+* The heading/rotation when `walk(:to)` is not realistic -> Make Doggo look to the point where it is going 
+* Only one animation plays. Implement walk and sit animations for more realistic Doggo with animation/rigging
 * Occlusion does not work (cannot play 1-person)
 
